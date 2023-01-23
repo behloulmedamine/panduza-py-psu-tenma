@@ -5,13 +5,13 @@
 # interface
 
 import abc
-import aardvark_py
+# udevadm info /dev/ttyUSB0
 
-# hérite de metaclass ABCMeta ?
+# hérite de metaclass ABCMeta
 # ABC est standard
 
 # dummy data pour lancer la clock
-# detection fait par panduza
+# detection faite par panduza
 
 class ConnectorSPIMasterBase(metaclass=abc.ABCMeta) :
         """
@@ -19,26 +19,17 @@ class ConnectorSPIMasterBase(metaclass=abc.ABCMeta) :
         """
 
         @abc.abstractmethod
-        def SPI_write(self, data) : # handler ?
+        def SPI_write(self, data) :
                 """
-                Find connected devices
+                Write data (MOSI)
                 """
                 pass
 
         @abc.abstractmethod
         def SPI_read(self) :
                 """
-                Find connected devices
+                Read data (MISO)
                 """
                 pass
 
-
-# TODO Questions :
-
-# FTDI ou SPI ?
-# Get ?
-# TTYPortFromUsbInfo
-# Interface python duck typing
-# règles udev
-
-# Liste des fonctions à implémenter ?
+# TODO Must change argument

@@ -1,7 +1,8 @@
 from ...meta_driver import MetaDriver
 from ...connectors.spi_master_ftdi import ConnectorSPIMasterFTDI
 
-# MetaDriverFtdiSpi ?
+# TODO must add a FTDI metadriver ?
+# pas de metadriver pour modbus
 class FtdiSpi(MetaDriver):
         """
         Driver for FTDI-SPI chip
@@ -10,7 +11,7 @@ class FtdiSpi(MetaDriver):
         ###########################################################################
         ###########################################################################
 
-        # TODO modbus.client -> ftdi.client
+        # must match with tree.json content
         def _PZADRV_config(self):
                 return {
                         "info": {
@@ -18,8 +19,8 @@ class FtdiSpi(MetaDriver):
                                 "version": "0.0"
                         },
                         "compatible": [
-                                "ftdi.client",
-                                "py.ftdi.client"
+                                "ftdi.spi",
+                                "py.ftdi.spi"
                         ]
                 }
 
@@ -27,7 +28,25 @@ class FtdiSpi(MetaDriver):
         ###########################################################################
 
         def _PZADRV_loop_ini(self, tree):
-                pass
+                # self.log.debug(f"{tree}")
+
+                settings = tree["settings"]
+
+
+                # Get the gate
+                self.ftdiSpi = ConnectorSPIMasterFTDI.Get(
+                        port=settings["ftdi"]["port"], # TODO "ftdi" est ce que c'est le bon nom
+                        polarity=settings["ftdi"]["polarity"],
+                        phase=settings["ftdi"]["phase"],
+                        bitorder=settings["ftdi"]["bitorder"]
+                )
+
+
+                self.__cmd_handlers = {
+                        "holding_regs": self.__handle_cmds_set_holding_regs,
+                }
+
+                self._pzadrv_ini_success()
 
         ###########################################################################
         ###########################################################################
@@ -51,7 +70,12 @@ class FtdiSpi(MetaDriver):
         def _PZADRV_cmds_set(self, payload):
                 """From MetaDriver
                 """
-                pass
+                cmds = self.payload_to_dict(payload)
+                self.log.debug(f"cmds as json : {cmds}")
+                for att in self.__cmd_handlers:
+                        if att in cmds:
+                                self.__cmd_handlers[att](cmds[att])
+
 
         ###########################################################################
         ###########################################################################
@@ -59,4 +83,14 @@ class FtdiSpi(MetaDriver):
         def __handle_cmds_set_holding_regs(self, cmd_att):
                 """
                 """
-                pass
+                if "values" in cmd_att:
+                        values = cmd_att["values"]
+                        try:
+                                for u in values:
+                                        for addr in values[u]:
+                                                self.log.debug(f"on unit {u} SPI write {addr} with {values[u][addr]}")
+                                                self.ftdiSpi.SPI_write(self, values) # TODO data in out ?
+
+                                # self._update_attribute("state", "value", v)
+                        except Exception as e:
+                                self.log.error(f"{e}")
