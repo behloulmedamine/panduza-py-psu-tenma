@@ -7,18 +7,8 @@ from pyftdi.ftdi import Ftdi
 from pyftdi.usbtools import UsbToolsError
 from .udev_tty import TTYPortFromUsbInfo
 
-# enum SpiPolarity
-SPI_POL_RISING_FALLING = 0
-SPI_POL_FALLING_RISING = 1
-
-# enum SpiPhase
-SPI_PHASE_SAMPLE_SETUP = 0
-SPI_PHASE_SETUP_SAMPLE = 1
-
-# enum SpiBitorder
-SPI_BITORDER_MSB = 0
-SPI_BITORDER_LSB = 1
-
+from spi_master_base import ConnectorSPIMasterBase
+from array import array, ArrayType # TODO ?
 
 class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
         """The FtdiSpi client connector
@@ -35,6 +25,7 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
         def Get(usb_vendor_id: str = None, usb_product_id: str = None, usb_serial_id: str = None, usb_base_dev_tty: str ="/dev/ttyACM", port: str = None, polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP, bitorder: int = SPI_BITORDER_MSB) :
                 """
                 Singleton main getter
+                Get metadata to identify device (vendor_id, product_id ...)
                 """
                 port_name = ""
                 if port != "":
