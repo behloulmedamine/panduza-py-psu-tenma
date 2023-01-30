@@ -12,15 +12,15 @@ class ConnectorSPIMasterBase(metaclass=abc.ABCMeta) :
         """
 
         @abc.abstractmethod
-        def SPI_write(self, data) : # handler ?
+        def SPI_write(self, data) :
                 """
-                Find connected devices
+                Write data (MOSI)
                 """
                 pass
 
         @abc.abstractmethod
         def SPI_read(self) :
                 """
-                Find connected devices
+                Read data (MISO)
                 """
                 pass
