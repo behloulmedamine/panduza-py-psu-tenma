@@ -3,7 +3,7 @@ from ...connectors.spi_master_ftdi import ConnectorSPIMasterFTDI
 
 # TODO must add a FTDI metadriver ?
 # pas de metadriver pour modbus
-class FtdiSpi(MetaDriver):
+class DriverFtdiSpi(MetaDriver):
         """
         Driver for FTDI-SPI chip
         """
@@ -15,8 +15,8 @@ class FtdiSpi(MetaDriver):
         def _PZADRV_config(self):
                 return {
                         "info": {
-                                "type": "ftdi.client",
-                                "version": "0.0"
+                                "type": "ftdi_spi.client",
+                                "version": "0.1"
                         },
                         "compatible": [
                                 "ftdi.spi",
@@ -35,10 +35,11 @@ class FtdiSpi(MetaDriver):
 
                 # Get the gate
                 self.ftdiSpi = ConnectorSPIMasterFTDI.Get(
-                        port=settings["ftdi"]["port"], # TODO "ftdi" est ce que c'est le bon nom
-                        polarity=settings["ftdi"]["polarity"],
-                        phase=settings["ftdi"]["phase"],
-                        bitorder=settings["ftdi"]["bitorder"]
+                        usb_serial_id=settings["usb_serial_id"],
+                        port=settings["port"],
+                        polarity=settings["polarity"],
+                        phase=settings["phase"],
+                        bitorder=settings["bitorder"]
                 )
 
 

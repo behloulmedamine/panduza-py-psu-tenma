@@ -6,8 +6,16 @@
             "port": 1883,
             "interfaces": [
                 {
-                    "name": "test io",
-                    "driver": "py.io_fake"
+                    "name": "test_ftdi_spi",
+                    "driver": "ftdi.spi",
+                    "settings":
+                    {
+                        "usb_serial_id": "FT8CEM8A",
+                        "port": "/2",
+                        "polarity": 0,
+                        "phase": 0,
+                        "bitorder" : 0
+                    }
                 }
             ]
         }

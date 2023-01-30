@@ -1,12 +1,11 @@
 # Functions called by spi_master_base for ftdi chips
 
-# function Get static
-# create object
-
-from spi_master_base import ConnectorSPIMasterBase
+from .spi_master_base import ConnectorSPIMasterBase
 from loguru import logger
 import pyftdi.spi as Spi
-import aardvark_py as AA # TODO à suppr
+from pyftdi.ftdi import Ftdi
+from pyftdi.usbtools import UsbToolsError
+from .udev_tty import TTYPortFromUsbInfo
 
 # enum SpiPolarity
 SPI_POL_RISING_FALLING = 0
@@ -31,29 +30,25 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
         ###########################################################################
         ###########################################################################
 
+        # TODO warning : Expression of type "None" cannot be assigned to parameter of type "str"
         @staticmethod
-        def Get(port: str = "", polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP, bitorder: int = SPI_BITORDER_MSB) :
+        def Get(usb_vendor_id: str = None, usb_product_id: str = None, usb_serial_id: str = None, usb_base_dev_tty: str ="/dev/ttyACM", port: str = None, polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP, bitorder: int = SPI_BITORDER_MSB) :
                 """
                 Singleton main getter
                 """
-                # Get the serial port key
-                # TODO est ce que j'ai besoin de usb vendor id etc ... ?
-                # TTYPortFromUsbInfo ?
-                # la carte est relié en USB
-                # pour discriminer la carte, j'ai besoin de vendor id et du serial number ?
-                # il est dans settings ?
                 port_name = ""
                 if port != "":
                         port_name = port
-
+                elif usb_vendor_id != None and usb_product_id != None:
+                        port_name = TTYPortFromUsbInfo(usb_vendor_id, usb_product_id, usb_serial_id, usb_base_dev_tty)
                 else:
-                        raise Exception("no way to identify the modbus serial port")
+                        raise Exception("no way to identify the SPI serial port")
 
                 # Create the new connector
                 if not (port_name in ConnectorSPIMasterFTDI.__instances):
                         ConnectorSPIMasterFTDI.__instances[port_name] = None
                 try:
-                        new_instance = ConnectorSPIMasterFTDI(port_name, polarity, phase, bitorder)
+                        new_instance = ConnectorSPIMasterFTDI(port_name, usb_serial_id, port)
                         ConnectorSPIMasterFTDI.__instances[port_name] = new_instance
                 except Exception as e:
                         ConnectorSPIMasterFTDI.__instances.pop(port_name)
@@ -63,43 +58,40 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                 return ConnectorSPIMasterFTDI.__instances[port_name]
 
 
-
-        def __init__(self, key: str = "", polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP, bitorder: int = SPI_BITORDER_MSB) : 
+        # TODO warning : Expression of type "None" cannot be assigned to parameter of type "str"
+        # TODO apriori pas besoin des vendor et product id
+        def __init__(self, key: str = None, usb_serial_id: str = None, port: str = None, polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP, bitorder: int = SPI_BITORDER_MSB) :
                 """Constructor
                 """
                 if not (key in ConnectorSPIMasterFTDI.__instances):
                         raise Exception("You need to pass through Get method to create an instance")
                 else:
                         self.log = logger.bind(driver_name=key)
-                        self.log.info(f"attached to the Modbus Serial Client Connector")
+                        self.log.info(f"attached to the FTDI SPI Serial Client Connector")
+
+                # List Ftdi device URL
+                # try :
+                #         connected_ftdi_list = Ftdi.list_devices(f"ftdi://ftdi::{usb_serial_id}/{port}")
+                # except UsbToolsError as e :
+                #         raise Exception('Cannot find device').with_traceback(e.__traceback__)
 
                 # create client object
                 self.client = Spi.SpiController() # TODO est ce que je donne les args du constructor ?
-                self.client.configure('ftdi://ftdi:2232:FT7TS7JR/1') # TODO où je donne le numéro de série ? Dans les param ?
-                # TODO dans configure, dans l'url, ou est port name ?
-                # ftdi://ftdi:2232:FT7TS7JR/1
-                # (f'ftdi://{chip_number}{serial_number}{port_name}')
-                # TTYPortFromUsbInfo ?
+                self.client.configure(f'ftdi://ftdi::{usb_serial_id}/{port}')
+                # self.client.configure(f'ftdi://ftdi::FT8CEM8A/2')
 
-                # connect to device
-                # self.client.connect()
-                # TODO connect ? la connexion mqtt se fait dans le metal
-
-                # TODO est ce que les arg ici ne sont pas ceux à donner dans init ?
-                # spi = self.client.get_port(cs = 0, freq = 1E6, mode = 0) 
-
-                # TODO write ?
+                # get port for SPI
+                self.spi = self.client.get_port(cs = 0, freq = 1E6, mode = 0)
 
                 # disconnect device
                 # client.close(freeze = True)
 
 
-        def SPI_write(self, data_in, data_out):
+        def SPI_write(self, data):
                 """"""
                 # send dummy data to initialize connection
-                # AA.aa_spi_write()
-                return
+                self.spi.exchange(data)
 
         def SPI_read(self):
-                # AA.aa_spi_slave_read()
-                return 
+                """"""
+                return self.spi.exchange()
