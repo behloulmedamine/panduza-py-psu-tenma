@@ -31,5 +31,3 @@ class ConnectorSPIMasterBase(metaclass=abc.ABCMeta) :
                 Read data (MISO)
                 """
                 pass
-
-# TODO Must change argument
