@@ -28,9 +28,6 @@ class MetaDriverSerial(MetaDriver):
             "data": self.__handle_cmds_set_data
         }
 
-        # self._update_attribute("state", "value", self._PZADRV_PSU_read_state_value())
-        # self._update_attribute("volts", "value", self._PZADRV_PSU_read_volts_value())
-
         # default = dict() if "default" not in tree else tree["default"]
         # self._update_attributes_from_dict(default)
 

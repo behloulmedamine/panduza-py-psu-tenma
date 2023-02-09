@@ -117,7 +117,7 @@ class DriverHM310T(MetaDriverPsu):
         self.log.info(f"write state addr={hex(addr)} value={int16_value}")
         self.modbus.write_register(addr, int16_value, self.modbus_unit)
 
-    def _PZADRV_PSU_read_volts_value(self):
+    def _PZADRV_PSU_read_volts_goal(self):
         # addr = 0x0010 # not really reliable
         addr = 0x0030
         regs = self.modbus.read_holding_registers(addr, 1, self.modbus_unit)
@@ -125,20 +125,20 @@ class DriverHM310T(MetaDriverPsu):
         float_value = float(regs[0]) / 100.0
         return float_value
 
-    def _PZADRV_PSU_write_volts_value(self, v):
+    def _PZADRV_PSU_write_volts_goal(self, v):
         addr = 0x0030
         int16_value = int(v * 100)
         self.log.info(f"write volts addr={hex(addr)} valuex100={int16_value}")
         self.modbus.write_register(addr, int16_value, self.modbus_unit)
 
-    def _PZADRV_PSU_read_amps_value(self):
+    def _PZADRV_PSU_read_amps_goal(self):
         addr = 0x0031
         regs = self.modbus.read_holding_registers(addr, 1, self.modbus_unit)
         self.log.info(f"read amps addr={hex(addr)} regs={regs}")
         float_value = float(regs[0]) / 1000.0
         return float_value
 
-    def _PZADRV_PSU_write_amps_value(self, v):
+    def _PZADRV_PSU_write_amps_goal(self, v):
         addr = 0x0031
         int16_value = int(v * 1000.0)
         self.log.info(f"write amps addr={hex(addr)} valuex1000={int16_value}")

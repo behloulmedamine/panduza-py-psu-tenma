@@ -123,17 +123,17 @@ class DriverIPS4303S(MetaDriverPsu):
         cmd = STATE_VALUE_ENUM[v]
         self.__write(f"OUT{int(cmd)}")
 
-    def _PZADRV_PSU_read_volts_value(self):
+    def _PZADRV_PSU_read_volts_goal(self):
         return self.volts
 
-    def _PZADRV_PSU_write_volts_value(self, v):
+    def _PZADRV_PSU_write_volts_goal(self, v):
         self.volts = v
         self.__write(f"VSET1:{v:.3f}")
 
-    def _PZADRV_PSU_read_amps_value(self):
+    def _PZADRV_PSU_read_amps_goal(self):
         return self.amps
     
-    def _PZADRV_PSU_write_amps_value(self, v):
+    def _PZADRV_PSU_write_amps_goal(self, v):
         self.amps = v
         self.__write(f"ISET1:{v:.3f}")
 

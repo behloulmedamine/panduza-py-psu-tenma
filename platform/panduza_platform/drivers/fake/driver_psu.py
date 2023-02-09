@@ -76,14 +76,14 @@ class DriverPsuFake(MetaDriverPsu):
     ###########################################################################
     ###########################################################################
 
-    def _PZADRV_PSU_read_volts_value(self):
+    def _PZADRV_PSU_read_volts_goal(self):
         self.log.info(f"read volts !")
         return self.__fakes["volts"]["value"]
 
     ###########################################################################
     ###########################################################################
 
-    def _PZADRV_PSU_write_volts_value(self, v):
+    def _PZADRV_PSU_write_volts_goal(self, v):
         self.log.info(f"write volts : {v}")
 
 
