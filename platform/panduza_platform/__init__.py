@@ -6,6 +6,7 @@ from .meta_drivers.psu import MetaDriverPsu
 
 from .connectors.serial_tty import ConnectorSerialTty
 from .connectors.modbus_client_serial import ConnectorModbusClientSerial
+from .connectors.spi_master_ftdi import ConnectorSPIMasterFTDI
 
 
 

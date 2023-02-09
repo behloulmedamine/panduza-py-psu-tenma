@@ -1,6 +1,6 @@
 # Functions called by spi_master_base for ftdi chips
 
-from spi_master_base import ConnectorSPIMasterBase
+from .spi_master_base import ConnectorSPIMasterBase
 from loguru import logger
 import pyftdi.spi as Spi
 
@@ -17,7 +17,7 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
 
         # TODO warning : Expression of type "None" cannot be assigned to parameter of type "str"
         @staticmethod
-        def Get(port: str = "", polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP, bitorder: int = SPI_BITORDER_MSB) :
+        def Get(usb_vendor_id: str = None, usb_product_id: str = None, usb_serial_id: str = None, usb_base_dev_tty: str ="/dev/ttyACM", port: str = None, polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP, bitorder: int = SPI_BITORDER_MSB) :
                 """
                 Singleton main getter
                 Get metadata to identify device (vendor_id, product_id ...)
