@@ -1,6 +1,5 @@
 import json
 import threading
-from ..core import Interface
 from ..core import Interface, Attribute, EnsureError, RoField, RwField
 
 from dataclasses import dataclass
@@ -12,43 +11,60 @@ class Ftdi_Spi_Client(Interface):
 
 	interface : Interface = None
 
-	def __post_init__(self, alias=None, addr=None, port=None, topic=None, client=None):
-		"""! Constructor
-		"""
-		super().__init__(alias, addr, port, topic, client)
-		self._post_initialization()
+	def __post_init__(self):
+		if self.alias:
+			pass
+		elif self.interface:
+			# Build from an other interface
+			self.alias = self.interface.alias
+			self.addr = self.interface.addr
+			self.port = self.interface.port
+			self.topic = self.interface.topic
+			self.client = self.interface.client
 
+		super().__post_init__()
 
-	def _post_initialization(self):
-		        """! Declare attributes here
-			"""
-			# === STATE ===
-        # self.add_attribute(
-        #     Attribute(
-        #         name = "state"
-        #     )
-        # ).add_field(
-        #     RwField(
-        #         name = "value"
-        #     )
-        # )
-        # # === VOLTS ===
-        # self.add_attribute(
-        #     Attribute(
-        #         name = "volts"
-        #     )
-        # ).add_field(
-        #     RwField(
-        #         name = "value"
-        #     )
-        # )
-        # # === VOLTS ===
-        # self.add_attribute(
-        #     Attribute(
-        #         name = "amps"
-        #     )
-        # ).add_field(
-        #     RwField(
-        #         name = "value"
-        #     )
-        # )
+		# === CS COUNT ===
+		self.add_attribute(
+			Attribute(
+			name = "cs_count"
+			)
+		).add_field(
+			RwField(
+				
+			name = "value"
+			)
+		)
+
+		# === FREQUENCY ===
+		self.add_attribute(
+			Attribute(
+			name = "frequency"
+			)
+		).add_field(
+			RwField(
+			name = "value"
+			)
+		)
+
+		# === POLARITY ===
+		self.add_attribute(
+			Attribute(
+			name = "polarity"
+			)
+		).add_field(
+			RwField(
+			name = "value"
+			)
+		)
+
+		# === PHASE ===
+		self.add_attribute(
+			Attribute(
+			name = "phase"
+			)
+		).add_field(
+			RwField(
+			name = "value"
+			)
+		)
