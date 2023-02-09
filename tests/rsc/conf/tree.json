@@ -1,0 +1,16 @@
+{
+    "machine": "test",
+    "brokers": {
+        "my_broker": {
+            "addr": "localhost",
+            "port": 1883,
+            "interfaces": [
+                {
+                    "name": "power_001",
+                    "group": "power",
+                    "driver": "psu.fake"
+                }
+            ]
+        }
+    }
+}
