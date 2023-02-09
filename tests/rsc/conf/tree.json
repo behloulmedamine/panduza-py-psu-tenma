@@ -6,7 +6,7 @@
             "port": 1883,
             "interfaces": [
                 {
-                    "name": "power_001",
+                    "name": "psu_1",
                     "group": "power",
                     "driver": "psu.fake"
                 }

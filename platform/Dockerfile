@@ -22,6 +22,7 @@ RUN pip3 install pyserial
 RUN pip3 install paho-mqtt
 RUN pip3 install python-magic
 RUN pip3 install pymodbus==3.1.2
+RUN pip install coloredlogs
 
 # Repos clone
 RUN echo $PZA_PY_PLATFORM_MODE

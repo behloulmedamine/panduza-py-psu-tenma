@@ -9,3 +9,9 @@ My template for robot framework project
 - rsc/libs: generic libraries
 - rsc/imgs: documentation images
 - report-serve.sh: mount a nginx web server for the robot report on this directory
+
+
+
+pip install PyHamcrest
+
+

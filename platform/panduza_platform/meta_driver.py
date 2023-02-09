@@ -7,6 +7,7 @@ import traceback
 import threading
 import paho.mqtt.client as mqtt
 from loguru import logger
+import logging
 
 class MetaDriver(metaclass=abc.ABCMeta):
     """Mother class for all the python meta drivers
@@ -66,7 +67,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
 
         # Init name and logger
         self._name = self._tree["name"]
-        self.log = logger.bind(driver_name=self._name)
+        self.log = logging.getLogger(name=self._name)
 
         # Check for name in the driver tree
         if not ("info" in self._PZADRV_config()):
@@ -240,7 +241,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
         topic_string = str(msg.topic)
         
         # Debug purpose
-        self.log.debug("NEW MSG > topic={} payload='{}' !", topic_string, msg.payload)
+        self.log.debug(f"NEW MSG > topic={topic_string} payload='{msg.payload}' !")
 
         # Check if it is a discovery request
         if topic_string == "pza":
