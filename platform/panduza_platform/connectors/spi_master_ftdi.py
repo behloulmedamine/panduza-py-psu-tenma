@@ -100,11 +100,11 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                 # self.client.close(freeze = true)
 
 
-        def SPI_write(self, data):
+        def spi_write(self, data):
                 """"""
                 # send dummy data to initialize connection
                 self.spi.exchange(data)
 
-        def SPI_read(self):
+        def spi_read(self):
                 """"""
-                return self.spi.exchange()
+                self.data_read = self.spi.exchange()

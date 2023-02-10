@@ -5,7 +5,7 @@ from ..core import Interface, Attribute, EnsureError, RoField, RwField
 from dataclasses import dataclass
 
 @dataclass
-class Ftdi_Spi_Client(Interface):
+class Ftdi_Spi(Interface):
 	"""Interface to manage ftdi chip for spi
 	"""
 
@@ -24,22 +24,10 @@ class Ftdi_Spi_Client(Interface):
 
 		super().__post_init__()
 
-		# === CS COUNT ===
+		# === WRITE ===
 		self.add_attribute(
 			Attribute(
-			name = "cs_count"
-			)
-		).add_field(
-			RwField(
-				
-			name = "value"
-			)
-		)
-
-		# === FREQUENCY ===
-		self.add_attribute(
-			Attribute(
-			name = "frequency"
+			name = "write"
 			)
 		).add_field(
 			RwField(
@@ -47,24 +35,15 @@ class Ftdi_Spi_Client(Interface):
 			)
 		)
 
-		# === POLARITY ===
+		# === READ ===
 		self.add_attribute(
 			Attribute(
-			name = "polarity"
-			)
-		).add_field(
-			RwField(
-			name = "value"
+			name = "read"
 			)
 		)
-
-		# === PHASE ===
-		self.add_attribute(
-			Attribute(
-			name = "phase"
-			)
-		).add_field(
-			RwField(
-			name = "value"
-			)
-		)
+		# TODO mettre value le nb d'octet a lire ?
+		# ).add_field(
+		# 	RwField(
+		# 	name = "value"
+		# 	)
+		# )
