@@ -1,8 +1,6 @@
 from ...meta_driver import MetaDriver
 from ...connectors.spi_master_ftdi import ConnectorSPIMasterFTDI
 
-# TODO must add a FTDI metadriver ?
-# pas de metadriver pour modbus
 class DriverFtdiSpi(MetaDriver):
         """
         Driver for FTDI-SPI chip
@@ -14,8 +12,10 @@ class DriverFtdiSpi(MetaDriver):
         # must match with tree.json content
         def _PZADRV_config(self):
                 return {
+                        "name": "FtdiSpi",
+                        "description": "Generic Ftdi Spi interface",
                         "info": {
-                                "type": "ftdi_spi.client",
+                                "type": "ftdi_spi",
                                 "version": "0.1"
                         },
                         "compatible": [
@@ -38,14 +38,18 @@ class DriverFtdiSpi(MetaDriver):
                         usb_serial_id=settings["usb_serial_id"],
                         port=settings["port"],
                         polarity=settings["polarity"],
-                        phase=settings["phase"],
-                        bitorder=settings["bitorder"]
+                        phase=settings["phase"]
+                        # bitorder=settings["bitorder"] TODO
                 )
 
 
                 self.__cmd_handlers = {
-                        "holding_regs": self.__handle_cmds_set_holding_regs,
+                        "write" : self.__handle_cmd_write,
+                        "read" : self.__handle_cmd_read
                 }
+
+                # self._update_attribute("phase") TODO
+                # self._update_attribute("")
 
                 self._pzadrv_ini_success()
 
@@ -77,21 +81,37 @@ class DriverFtdiSpi(MetaDriver):
                         if att in cmds:
                                 self.__cmd_handlers[att](cmds[att])
 
-
         ###########################################################################
         ###########################################################################
 
-        def __handle_cmds_set_holding_regs(self, cmd_att):
+        # TODO c'est probablement pas bon write read
+        # TODO que faire avec les data ?
+        # def _PZADRV_SPI_read(self) :
+        #         return self.ftdiSpi.spi_read()
+
+        # def _PZADRV_SPI_write(self, data) :
+        #         self.ftdiSpi.spi_write(data)
+
+        def __handle_cmd_write(self, cmd_att) :
                 """
                 """
                 if "values" in cmd_att:
-                        values = cmd_att["values"]
-                        try:
-                                for u in values:
-                                        for addr in values[u]:
-                                                self.log.debug(f"on unit {u} SPI write {addr} with {values[u][addr]}")
-                                                self.ftdiSpi.SPI_write(self, values) # TODO data in out ?
+                values = cmd_att["values"]
+                try:
+                        for u in values:
+                                self.log.debug(f"spi write data {values[u]}")
+                                self.ftdiSpi.spi_write(int(values[u]))
+                                # TODO give spi write the cs
+                        # self._update_attribute("state", "value", v)
+                except Exception as e:
+                        self.log.error(f"{e}")
 
-                                # self._update_attribute("state", "value", v)
-                        except Exception as e:
-                                self.log.error(f"{e}")
+        # where does the data go ?
+        def __handle_cmd_read(self) :
+                """
+                """
+                try:
+                        self.log.debug(f"spi read data ")
+                        self.ftdiSpi.spi_read()
+                except Exception as e:
+                        self.log.error(f"{e}")

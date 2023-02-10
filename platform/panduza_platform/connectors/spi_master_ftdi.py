@@ -3,6 +3,22 @@
 from .spi_master_base import ConnectorSPIMasterBase
 from loguru import logger
 import pyftdi.spi as Spi
+from pyftdi.ftdi import Ftdi
+from pyftdi.usbtools import UsbToolsError
+from .udev_tty import TTYPortFromUsbInfo
+from typing import Mapping
+
+# enum SpiPolarity
+SPI_POL_RISING_FALLING = 0
+SPI_POL_FALLING_RISING = 1
+
+# enum SpiPhase
+SPI_PHASE_SAMPLE_SETUP = 0
+SPI_PHASE_SETUP_SAMPLE = 1
+
+# enum SpiBitorder
+SPI_BITORDER_MSB = 0
+SPI_BITORDER_LSB = 1
 
 
 class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
@@ -17,7 +33,7 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
 
         # TODO warning : Expression of type "None" cannot be assigned to parameter of type "str"
         @staticmethod
-        def Get(usb_vendor_id: str = None, usb_product_id: str = None, usb_serial_id: str = None, usb_base_dev_tty: str ="/dev/ttyACM", port: str = None, polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP, bitorder: int = SPI_BITORDER_MSB) :
+        def Get(usb_vendor_id: str = None, usb_product_id: str = None, usb_serial_id: str = None, usb_base_dev_tty: str ="/dev/ttyACM", port: str = None, frequency : float = 1E6, cs_count : int = 1, polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP, bitorder: int = SPI_BITORDER_MSB) :
                 """
                 Singleton main getter
                 Get metadata to identify device (vendor_id, product_id ...)
@@ -34,7 +50,7 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                 if not (port_name in ConnectorSPIMasterFTDI.__instances):
                         ConnectorSPIMasterFTDI.__instances[port_name] = None
                 try:
-                        new_instance = ConnectorSPIMasterFTDI(port_name, usb_serial_id, port)
+                        new_instance = ConnectorSPIMasterFTDI(port_name, usb_serial_id, port, frequency, cs_count = 1, polarity = SPI_POL_RISING_FALLING, phase = SPI_PHASE_SAMPLE_SETUP, bitorder = SPI_BITORDER_MSB)
                         ConnectorSPIMasterFTDI.__instances[port_name] = new_instance
                 except Exception as e:
                         ConnectorSPIMasterFTDI.__instances.pop(port_name)
@@ -43,10 +59,12 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                 # Return the previously created
                 return ConnectorSPIMasterFTDI.__instances[port_name]
 
-
-        # TODO warning : Expression of type "None" cannot be assigned to parameter of type "str"
+        
+        # TODO CS_COUNT
         # TODO apriori pas besoin des vendor et product id
-        def __init__(self, key: str = None, usb_serial_id: str = None, port: str = None, polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP, bitorder: int = SPI_BITORDER_MSB) :
+        # TODO comment rendre générique ?
+        # TODO bitorder: int = SPI_BITORDER_MSB ?
+        def __init__(self, key: str = None, usb_serial_id: str = None, port: str = None, frequency : float = 1E6, cs_count : int = 1, polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP) :
                 """Constructor
                 """
                 if not (key in ConnectorSPIMasterFTDI.__instances):
@@ -62,22 +80,32 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                 #         raise Exception('Cannot find device').with_traceback(e.__traceback__)
 
                 # create client object
-                self.client = Spi.SpiController() # TODO est ce que je donne les args du constructor ?
-                self.client.configure(f'ftdi://ftdi::{usb_serial_id}/{port}')
-                # self.client.configure(f'ftdi://ftdi::FT8CEM8A/2')
+                # cs_count is the number of slaves
+                self.client = Spi.SpiController(cs_count = cs_count)
+
+                self.client.configure(f'ftdi://ftdi::{usb_serial_id}/{port}', frequency = frequency)
 
                 # get port for SPI
-                self.spi = self.client.get_port(cs = 0, freq = 1E6, mode = 0)
+                mode = (polarity << 1) | phase
+                
+                # get_port creates a port whose number is cs and its parameters are the following args
+                self.spi = self.client.get_port(cs = 0, freq = frequency, mode = mode)
+                
+                # self.spi_ports = [None] * cs_count
+                # for i in range(0, cs_count) :
+                #         self.spi_ports[i] = self.client.get_port(cs = i, frequency = frequency[i], mode = mode[i])
+
 
                 # disconnect device
-                # client.close(freeze = True)
+                # TODO close spi
+                # self.client.close(freeze = true)
 
 
-        def SPI_write(self, data):
+        def spi_write(self, data):
                 """"""
                 # send dummy data to initialize connection
                 self.spi.exchange(data)
 
-        def SPI_read(self):
+        def spi_read(self):
                 """"""
-                return self.spi.exchange()
+                self.data_read = self.spi.exchange()
