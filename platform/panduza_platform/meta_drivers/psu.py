@@ -260,10 +260,20 @@ class MetaDriverPsu(MetaDriver):
         if "goal" in cmd_att:
             v = cmd_att["goal"]
             if not isinstance(v, int) and not isinstance(v, float):
-                raise Exception(f"Invalid type for volts.goal {type(v)}")
+                raise Exception(f"Invalid type for amps.goal {type(v)}")
             try:
-                self._PZADRV_PSU_write_amps_goal(v)
-                self._update_attribute("amps", "goal", v)
+                if self._get_field("amps", "min") <= v <= self._get_field("amps", "max"):
+                    self._PZADRV_PSU_write_amps_goal(v)
+                    self._update_attributes_from_dict(
+                    {
+                        "amps": {
+                            "goal": self._PZADRV_PSU_read_amps_goal(),
+                            "real": self._PZADRV_PSU_read_amps_real()
+                        }
+                    })
+                else:
+                    self.log.error(
+                        f"goal {v} out of range {self._get_field('amps', 'min')} < {self._get_field('amps', 'max')}")
             except Exception as e:
                 self.log.error(f"{e}")
 

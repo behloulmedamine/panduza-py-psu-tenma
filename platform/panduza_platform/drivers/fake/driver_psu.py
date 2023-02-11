@@ -107,3 +107,25 @@ class DriverPsuFake(MetaDriverPsu):
     def _PZADRV_PSU_read_volts_real(self):
         self.log.info(f"read volts real !")
         return self._volts["real"]
+
+    ###########################################################################
+    ###########################################################################
+
+    def _PZADRV_PSU_read_amps_goal(self):
+        self.log.info(f"read amps goal !")
+        return self._amps["goal"]
+
+    ###########################################################################
+    ###########################################################################
+
+    def _PZADRV_PSU_write_amps_goal(self, v):
+        self.log.info(f"write amps : {v}")
+        self._amps["goal"] = v
+        self._amps["real"] = v
+
+    ###########################################################################
+    ###########################################################################
+
+    def _PZADRV_PSU_read_amps_real(self):
+        self.log.info(f"read amps real !")
+        return self._amps["real"]
