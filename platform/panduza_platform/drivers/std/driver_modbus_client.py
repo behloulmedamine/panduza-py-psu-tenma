@@ -80,7 +80,7 @@ class DriverModbusClient(MetaDriver):
     ###########################################################################
     ###########################################################################
 
-    def _PZADRV_loop_ini(self, tree):
+    def _PZADRV_loop_init(self, tree):
 
         # self.log.debug(f"{tree}")
 
@@ -97,7 +97,7 @@ class DriverModbusClient(MetaDriver):
             "watchlist": self.__handle_cmds_set_watchlist,
         }
 
-        self._pzadrv_ini_success()
+        self._pzadrv_init_success()
 
 
     ###########################################################################

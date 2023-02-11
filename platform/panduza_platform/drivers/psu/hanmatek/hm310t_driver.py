@@ -67,7 +67,7 @@ class DriverHM310T(MetaDriverPsu):
     ###########################################################################
     ###########################################################################
 
-    def _PZADRV_loop_ini(self, tree):
+    def _PZADRV_loop_init(self, tree):
 
         
 
@@ -91,7 +91,7 @@ class DriverHM310T(MetaDriverPsu):
         self._pzadrv_psu_update_misc("model", "HM310T (Hanmatek)")
 
         # Call meta class PSU ini
-        super()._PZADRV_loop_ini(tree)
+        super()._PZADRV_loop_init(tree)
 
     ###########################################################################
     ###########################################################################

@@ -8,6 +8,42 @@ class MetaDriverPsu(MetaDriver):
     ###########################################################################
     ###########################################################################
     #
+    # Data and variables
+    #
+    ###########################################################################
+    ###########################################################################
+
+    _state = {
+        "value": "off"
+    }
+
+    _volts = {
+        "goal": 0,
+        "real": 0,
+        "min": 0,
+        "max": 0
+    }
+
+    _amps = {
+        "goal": 0,
+        "real": 0,
+        "min": 0,
+        "max": 0
+    }
+
+    _misc = {
+        "model": "",
+        "serial": ""
+    }
+
+    _settings = {
+        "ovp": False,
+        "ocp": False,
+    }
+
+    ###########################################################################
+    ###########################################################################
+    #
     # TO OVERRIDE IN DRIVER
     #
     ###########################################################################
@@ -141,7 +177,7 @@ class MetaDriverPsu(MetaDriver):
 
     # ---
 
-    def _PZADRV_loop_ini(self, tree):
+    def _PZADRV_loop_init(self, tree):
 
         self.__cmd_handlers = {
             "state": self.__handle_cmds_set_state,
@@ -150,15 +186,7 @@ class MetaDriverPsu(MetaDriver):
             "settings": self.__handle_cmds_set_settings
         }
 
-        self._update_attribute(
-            "state", "value", self._PZADRV_PSU_read_state_value())
-        self._update_attribute(
-            "volts", "value", self._PZADRV_PSU_read_volts_goal())
-
-        default = dict() if "default" not in tree else tree["default"]
-        self._update_attributes_from_dict(default)
-
-        self._pzadrv_ini_success()
+        self._pzadrv_init_success()
 
     # ---
 
@@ -209,8 +237,15 @@ class MetaDriverPsu(MetaDriver):
             try:
                 if self._get_field("volts", "min") <= v <= self._get_field("volts", "max"):
                     self._PZADRV_PSU_write_volts_goal(v)
-                    self._update_attribute(
-                        "volts", "goal", self._PZADRV_PSU_read_volts_goal())
+                    self._update_attributes_from_dict(
+                    {
+                        "volts": {
+                            "goal": self._PZADRV_PSU_read_volts_goal(),
+                            "real": self._PZADRV_PSU_read_volts_real()
+                        }
+                    })
+                    #self._update_attribute(
+                    #    "volts", "goal", self._PZADRV_PSU_read_volts_goal())
                 else:
                     self.log.error(
                         f"goal {v} out of range {self._get_field('volts', 'min')} < {self._get_field('volts', 'max')}")

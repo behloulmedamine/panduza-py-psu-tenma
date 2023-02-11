@@ -57,7 +57,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
         self.__drv_atts = { }
 
         # Current state of the driver
-        self.__drv_state = 'ini'
+        self.__drv_state = 'init'
         self.__drv_state_prev = None
 
         # Time where the state started
@@ -158,7 +158,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
 
         # States
         __states = {
-            'ini': self.__drv_state_ini,
+            'init': self.__drv_state_init,
             'run': self.__drv_state_run,
             'err': self.__drv_state_err
         }
@@ -191,11 +191,11 @@ class MetaDriver(metaclass=abc.ABCMeta):
     ###########################################################################
     ###########################################################################
 
-    async def __drv_state_ini(self):
+    async def __drv_state_init(self):
         """
         """
         try:
-            self._PZADRV_loop_ini(self._tree)
+            self._PZADRV_loop_init(self._tree)
         except Exception as e:
             print(traceback.format_exc())
             self._pzadrv_error_detected(str(e))
@@ -377,7 +377,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
     ###########################################################################
     ###########################################################################
 
-    def _pzadrv_ini_success(self):
+    def _pzadrv_init_success(self):
         self.__drv_state = "run"
 
     def _pzadrv_error_detected(self, err_string):
@@ -385,7 +385,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
         self.__err_string = err_string
 
     def _pzadrv_restart(self):
-        self.__drv_state = "ini"
+        self.__drv_state = "init"
 
     ###########################################################################
     ###########################################################################
@@ -413,7 +413,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
         return []
 
     @abc.abstractmethod
-    def _PZADRV_loop_ini(self, tree):
+    def _PZADRV_loop_init(self, tree):
         """
         """
         pass
