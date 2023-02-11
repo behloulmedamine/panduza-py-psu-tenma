@@ -110,6 +110,7 @@ class DriverFtdiSpi(MetaDriver):
                                 self.log.debug("********** 333333333333 **********")
                                 self.log.error(f"{e}")
 
+        #TODO FAIRE READ
         def __handle_cmd_read(self) :
                 """
                 """

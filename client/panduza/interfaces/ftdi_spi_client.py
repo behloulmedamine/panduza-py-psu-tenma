@@ -34,16 +34,16 @@ class Ftdi_Spi(Interface):
 			name = "values"
 			)
 		)
-# TODO FAIRE READ !
+
+		# TODO FAIRE READ !
+		# mettre value le nb d'octet a lire ?
 		# === READ ===
 		self.add_attribute(
 			Attribute(
 			name = "read"
 			)
+ 		).add_field(
+		 	RwField(
+		 	name = "value"
+			)
 		)
-		# TODO mettre value le nb d'octet a lire ?
-		# ).add_field(
-		# 	RwField(
-		# 	name = "value"
-		# 	)
-		# )
