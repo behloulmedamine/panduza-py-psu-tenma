@@ -17,6 +17,8 @@ services:
     # To use your local platform build
     image: local/panduza-py-platform
     privileged: true
+    depends_on: 
+      - mosquitto
     network_mode: host
     volumes:
       - .:/etc/panduza

@@ -38,6 +38,7 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                 Singleton main getter
                 Get metadata to identify device (vendor_id, product_id ...)
                 """
+                log = logger.debug("********** GET FTDI SPI **********")
                 port_name = ""
                 if port != "":
                         port_name = port
@@ -50,7 +51,7 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                 if not (port_name in ConnectorSPIMasterFTDI.__instances):
                         ConnectorSPIMasterFTDI.__instances[port_name] = None
                 try:
-                        new_instance = ConnectorSPIMasterFTDI(port_name, usb_serial_id, port, frequency, cs_count = 1, polarity = SPI_POL_RISING_FALLING, phase = SPI_PHASE_SAMPLE_SETUP, bitorder = SPI_BITORDER_MSB)
+                        new_instance = ConnectorSPIMasterFTDI(port_name, usb_serial_id, port, frequency, cs_count = 1, polarity = SPI_POL_RISING_FALLING, phase = SPI_PHASE_SAMPLE_SETUP)
                         ConnectorSPIMasterFTDI.__instances[port_name] = new_instance
                 except Exception as e:
                         ConnectorSPIMasterFTDI.__instances.pop(port_name)
@@ -71,25 +72,29 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                         raise Exception("You need to pass through Get method to create an instance")
                 else:
                         self.log = logger.bind(driver_name=key)
-                        self.log.info(f"attached to the FTDI SPI Serial Client Connector")
+                        self.log.info(f"attached to the FTDI SPI Serial Connector")
 
+                self.log.debug("********** __INIT__ CONNECTEUR FTDI SPI **********")
                 # List Ftdi device URL
                 # try :
                 #         connected_ftdi_list = Ftdi.list_devices(f"ftdi://ftdi::{usb_serial_id}/{port}")
                 # except UsbToolsError as e :
                 #         raise Exception('Cannot find device').with_traceback(e.__traceback__)
 
-                # create client object
+                # create controller object
                 # cs_count is the number of slaves
-                self.client = Spi.SpiController(cs_count = cs_count)
+                self.spi_master = Spi.SpiController(cs_count = cs_count)
 
-                self.client.configure(f'ftdi://ftdi::{usb_serial_id}/{port}', frequency = frequency)
+                self.spi_master.configure(f'ftdi://ftdi::{usb_serial_id}/{port}', frequency = frequency)
 
                 # get port for SPI
                 mode = (polarity << 1) | phase
-                
+
                 # get_port creates a port whose number is cs and its parameters are the following args
-                self.spi = self.client.get_port(cs = 0, freq = frequency, mode = mode)
+                self.spi = self.spi_master.get_port(cs = 0, freq = frequency, mode = mode)
+                
+                self.log.debug(f"********** ARGUMENTS {usb_serial_id} {port} {frequency} {cs_count} {polarity} {phase} {mode} **********")
+                self.spi.exchange([0xca, 0xfe])
                 
                 # self.spi_ports = [None] * cs_count
                 # for i in range(0, cs_count) :
@@ -104,8 +109,13 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
         def spi_write(self, data):
                 """"""
                 # send dummy data to initialize connection
+                self.log.debug("********** SPI WRITE CONNECTEUR **********")
+                self.log.debug(f"SPI WRITE CONNECTEUR DATA {data}")
+                # TODO spi est un port et non le SpiController !
+                self.spi.exchange([0xca, 0xfe])
                 self.spi.exchange(data)
 
         def spi_read(self):
                 """"""
+                self.log.debug("********** SPI READ CONNECTEUR **********")
                 self.data_read = self.spi.exchange()

@@ -31,10 +31,10 @@ class Ftdi_Spi(Interface):
 			)
 		).add_field(
 			RwField(
-			name = "value"
+			name = "values"
 			)
 		)
-
+# TODO FAIRE READ !
 		# === READ ===
 		self.add_attribute(
 			Attribute(

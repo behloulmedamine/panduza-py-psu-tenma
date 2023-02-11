@@ -19,8 +19,8 @@ class DriverFtdiSpi(MetaDriver):
                                 "version": "0.1"
                         },
                         "compatible": [
-                                "ftdi.spi",
-                                "py.ftdi.spi"
+                                "ftdi_spi",
+                                "py_ftdi_spi"
                         ]
                 }
 
@@ -29,7 +29,7 @@ class DriverFtdiSpi(MetaDriver):
 
         def _PZADRV_loop_ini(self, tree):
                 # self.log.debug(f"{tree}")
-
+                self.log.debug("********** _PZADRV_loop_ini FTDI SPI **********")
                 settings = tree["settings"]
 
 
@@ -95,18 +95,21 @@ class DriverFtdiSpi(MetaDriver):
         def __handle_cmd_write(self, cmd_att) :
                 """
                 """
+                self.log.debug("********** __HANDLE_CMD_WRITE **********")
+                self.log.debug(f"CMD_ATT = {cmd_att}")
                 if "values" in cmd_att:
-                values = cmd_att["values"]
-                try:
-                        for u in values:
-                                self.log.debug(f"spi write data {values[u]}")
-                                self.ftdiSpi.spi_write(int(values[u]))
-                                # TODO give spi write the cs
-                        # self._update_attribute("state", "value", v)
-                except Exception as e:
-                        self.log.error(f"{e}")
+                        self.log.debug("********** 1111111111111111111 **********")
+                        values = cmd_att["values"]
+                        try:
+                                self.log.debug("********** 222222222222 **********")
+                                self.log.debug(f"spi write data {values} type : {type(values[1])}")
+                                self.ftdiSpi.spi_write(values)
+                                # TODO give the cs the spi write
+                                # self._update_attribute("state", "value", v)
+                        except Exception as e:
+                                self.log.debug("********** 333333333333 **********")
+                                self.log.error(f"{e}")
 
-        # where does the data go ?
         def __handle_cmd_read(self) :
                 """
                 """
