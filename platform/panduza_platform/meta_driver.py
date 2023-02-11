@@ -9,6 +9,8 @@ import paho.mqtt.client as mqtt
 from loguru import logger
 import logging
 
+from .log.driver import driver_logger
+
 class MetaDriver(metaclass=abc.ABCMeta):
     """Mother class for all the python meta drivers
 
@@ -67,7 +69,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
 
         # Init name and logger
         self._name = self._tree["name"]
-        self.log = logging.getLogger(name=self._name)
+        self.log = driver_logger(self._name)
 
         # Check for name in the driver tree
         if not ("info" in self._PZADRV_config()):
