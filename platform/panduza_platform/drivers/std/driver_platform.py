@@ -24,7 +24,7 @@ class DriverPlatform(MetaDriver):
     ###########################################################################
     ###########################################################################
 
-    def _PZADRV_loop_ini(self, tree):
+    def _PZADRV_loop_init(self, tree):
 
         # self.log.debug(f"{tree}")
         # self.log.debug(f">>>>>>>>>{len(self._platform.interfaces)}")
@@ -35,7 +35,7 @@ class DriverPlatform(MetaDriver):
         self._update_attribute("info", "interfaces", self.number_of_interfaces)
 
         # Tell the platform that the init state end sucessfuly
-        self._pzadrv_ini_success()
+        self._pzadrv_init_success()
 
 
     ###########################################################################
