@@ -29,11 +29,13 @@ class EnsureError(Exception):
 class Attribute:
     name: str
     interface = None
+
     
     def __post_init__(self):
         """Initialize topics and logging
         """
-        self._log = logging.getLogger(f"PZA {self.name}")
+        self._log = logging.getLogger(f"att={self.name}")
+        self._field_data = {}
 
 
     def set_interface(self, interface):
@@ -48,7 +50,7 @@ class Attribute:
         # print("sub \n", self._topic_atts)
 
     def _on_att_message(self, topic, payload):
-        self._log.debug("Received new value")
+        self._log.info(f"Received new value {payload}")
         # print("Received new value\n")
 
     #     if payload is None:
@@ -65,21 +67,36 @@ class Attribute:
         setattr(self, field.name, field)
         return self
 
+    # ---
+
     @abstractmethod
     def get(self):
         pass
 
+    # ---
+
     def set(self, **kwargs):
         """Send a set command
         """
+        # Get ensure flag
+        ensure=kwargs.get('ensure', False)
+
+        # Prepare the payload
+        kwargs.pop('ensure', None)
         pyl={}
         for key, value in kwargs.items():
             # TODO Check if the key match a field name
-
             pyl[key] = value
         cmd={}
         cmd[self.name] = pyl
+
+        # Send message
         self.interface.client.publish_json(self._topic_cmds_set, cmd)
+
+        # If ensure flag is set, wait for it
+        if ensure:
+            while True:
+                pass
 
 ###############################################################################
 ###############################################################################

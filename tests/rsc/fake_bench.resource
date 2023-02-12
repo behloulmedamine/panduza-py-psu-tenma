@@ -7,4 +7,5 @@ Variables    envs/fake_bench.py
 *** Keywords ***
 
 Setup Bench Config
+    Set Log Level    DEBUG
     Load Pza Interfaces From Aliases    ${pza_aliases}

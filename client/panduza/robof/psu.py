@@ -29,14 +29,14 @@ class KeywordsPsu(object):
         pza[name].state.value.set(state)
 
     @keyword
-    def turn_on_power_supply(self, name):
+    def turn_on_power_supply(self, name, ensure=False):
         """Turn on the psu
         """
         pza = BuiltIn().get_variable_value("${__pza__}")
-        pza[name].state.value.set("on")
+        pza[name].state.value.set("on", ensure)
 
     @keyword
-    def turn_off_power_supply(self, name, teardown=False):
+    def turn_off_power_supply(self, name, ensure=False, teardown=False):
         """Turn on the psu
         """
         pza = BuiltIn().get_variable_value("${__pza__}")
@@ -45,6 +45,6 @@ class KeywordsPsu(object):
             # It is ok if panduza is not initialized, only if in the teardown process
             assert not teardown
         else:
-            pza[name].state.value.set("off")
+            pza[name].state.value.set("off", ensure)
 
 
