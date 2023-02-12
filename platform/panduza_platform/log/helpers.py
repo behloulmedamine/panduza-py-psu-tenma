@@ -24,3 +24,6 @@ def highlighter(message, patterns, debug=""):
     for pat, style in patterns.items():
         h = h.replace(pat, debug + style + pat + Style.RESET_ALL)
     return h
+
+
+    

@@ -12,26 +12,22 @@ from .helpers import level_highlighter, re_highlighter, highlighter
 level_patterns = {
     "DEBUG": Fore.WHITE + Style.DIM,
     "INFO": Fore.BLUE + Style.NORMAL,
-    # WARN=30.
-    # ERROR=40.
-    # CRITICAL=50.
+    "WARN": Fore.YELLOW + Style.BRIGHT,
+    "ERROR": Fore.RED + Style.BRIGHT,
+    "CRITICAL": Back.RED + Style.BRIGHT,
 }
 
 re_patterns = [
     [ re.compile(r'[\s,]+(\d.+)[\s,]+'), Fore.CYAN], # numbers
-    [ re.compile(r'\'.*?\''), Fore.YELLOW], # strings
-    [ re.compile(r'\".*?\"'), Fore.YELLOW], # strings
-
-    # @
-    # #
-    # |
-    # |
+    [ re.compile(r'[\s,{}]+(\'.*?\')'), Fore.YELLOW], # strings
+    [ re.compile(r'[\s,{}]+(\".*?\")'), Fore.YELLOW], # strings
+    [ re.compile(r'[\s=]+(%.*?%)'), Fore.BLUE], # topics
 ]
 
 patterns = {
-    "\"name\"": Fore.GREEN,
-    "\"group\"": Fore.GREEN,
-    "\"driver\"": Fore.RED,
+    "started!": Fore.GREEN,
+    "MSG_IN": Fore.MAGENTA,
+    "MSG_OUT": Fore.CYAN,
 }
 
 

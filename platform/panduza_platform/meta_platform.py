@@ -330,7 +330,7 @@ class MetaPlatform:
                     thread.start()
                 
                 # Log
-                self._log.info("Platform started !")
+                self._log.info("Platform started!")
 
                 # Join them all !
                 for thread in self.threads:

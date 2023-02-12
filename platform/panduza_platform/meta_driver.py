@@ -154,7 +154,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
         """Core of the state machine
         """
         # log
-        self.log.info("Interface started !")
+        self.log.info("Interface started!")
 
         # States
         __states = {
@@ -243,7 +243,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
         topic_string = str(msg.topic)
         
         # Debug purpose
-        self.log.debug(f"NEW MSG > topic={topic_string} payload='{msg.payload}' !")
+        self.log.debug(f"MSG_IN > topic=%{topic_string}% payload={msg.payload} !")
 
         # Check if it is a discovery request
         if topic_string == "pza":
@@ -332,7 +332,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
         payload = json.dumps(pdict)
 
         # Debug purpose
-        self.log.debug(f"PUSH > topic={topic} payload='{payload}' retain='{do_retain}'")
+        self.log.debug(f"MSG_OUT > topic=%{topic}% payload={payload} retain={do_retain}")
 
         # Publish
         request = self.mqtt_client.publish(topic, payload, qos=qos, retain=do_retain)

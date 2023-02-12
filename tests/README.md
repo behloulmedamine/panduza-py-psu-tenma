@@ -1,6 +1,12 @@
 # robot-framework-template
 My template for robot framework project
 
+## Dependencies
+
+```bash
+pip install robotframework robotframework-pythonlibcore PyHamcrest
+```
+
 ## Directory Map
 
 - tests: put your acceptance tests here (.robot)
@@ -11,7 +17,5 @@ My template for robot framework project
 - report-serve.sh: mount a nginx web server for the robot report on this directory
 
 
-
-pip install PyHamcrest
 
 
