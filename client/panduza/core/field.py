@@ -49,7 +49,7 @@ class RwField(RoField):
     """Read Write Field
     """
     
-    def set(self, val, ensure=False):
+    def set(self, val, ensure=True):
         """To write the field
         """
         self.attribute.set(**{self.name: val, "ensure": ensure})

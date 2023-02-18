@@ -185,13 +185,19 @@ class Attribute:
     # ---
 
     def update_ack(self, expected_data):
+        """Control if the internal data match the expected one by the user
+        """
+        # debug
+        self._log.debug(f'update_ack expected={expected_data} recieved={self._field_data}')
 
-        self._log.debug(f'update_ack {expected_data} {self._field_data}')
-
+        # Control
         for key, value in expected_data.items():
-            if key not in self._field_data and self._field_data[key] != value:
+            if (key not in self._field_data) or (self._field_data[key] != value):
+                # self._log.debug(f'NOK')
                 return False
 
+        # Ok if no diff found
+        # self._log.debug(f'ok')
         return True
 
 ###############################################################################
