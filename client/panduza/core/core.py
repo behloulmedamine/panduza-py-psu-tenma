@@ -1,5 +1,9 @@
+import re
 import json
 import logging
+
+
+import panduza.core.log
 
 # Create the logger for core events
 CoreLog = logging.getLogger(f"pza.core")
@@ -14,6 +18,13 @@ class AliasError(Exception):
     def __init__(self, message):
         # Call the base class constructor with the parameters it needs
         super().__init__(message)
+
+
+
+
+
+
+
 
 # ┌────────────────────────────────────────┐
 # │ Core                                   │
@@ -157,4 +168,10 @@ class Core:
 
     ###########################################################################
     ###########################################################################
+
+    def EnableLogging(level=logging.DEBUG):
+        panduza.core.log.PZA_LOG_LEVEL = level
+        for name, logger in logging.Logger.manager.loggerDict.items():    
+            logging.getLogger(name).setLevel(panduza.core.log.PZA_LOG_LEVEL)
+
 

@@ -2,11 +2,38 @@ import re
 import logging
 from colorama import Fore, Back, Style
 
-from .helpers import level_highlighter, re_highlighter, highlighter
-
 # Fore: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
 # Back: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
 # Style: DIM, NORMAL, BRIGHT, RESET_ALL
+
+
+# UGLY
+PZA_LOG_LEVEL=level=logging.CRITICAL
+
+
+def level_highlighter(message, patterns):
+    h = message
+    for pat, style in patterns.items():
+        h = h.replace(pat, style + pat + Style.RESET_ALL)
+    return h
+
+def re_highlighter(message, patterns, debug=""):
+    h = message
+
+    for pat, style in patterns:
+        matches=(re.findall(pat, h))
+        if matches:
+            # print(pat, ">>>>", matches)
+            for m in matches:
+                h = h.replace(m, debug + style + m + Style.RESET_ALL)
+    return h
+
+def highlighter(message, patterns, debug=""):
+    h = message
+    for pat, style in patterns.items():
+        h = h.replace(pat, debug + style + pat + Style.RESET_ALL)
+    return h
+
 
 
 level_patterns = {
@@ -23,6 +50,7 @@ re_patterns = [
     [ re.compile(r'[\s,{}]+(\'.*?\')'), Fore.YELLOW], # strings
     [ re.compile(r'[\s,{}]+(\".*?\")'), Fore.YELLOW], # strings
     [ re.compile(r'[\s=]+(%.*?%)'), Fore.BLUE], # topics
+    [ re.compile(r'<.*?>+'), Fore.GREEN], # topics
 ]
 
 patterns = {
@@ -35,15 +63,18 @@ patterns = {
 BACKS = [Back.RED, Back.GREEN, Back.YELLOW, Back.BLUE, Back.MAGENTA, Back.CYAN, Back.WHITE]
 
 
-class DriverFormatter(logging.Formatter):
 
-    NextBackId=0
 
-    def __init__(self):
-        super().__init__()
-        self.back_id = DriverFormatter.NextBackId
-        self.back = BACKS[self.back_id]
-        DriverFormatter.NextBackId = (DriverFormatter.NextBackId+1)%len(BACKS)
+
+class MainFormatter(logging.Formatter):
+
+    # NextBackId=0
+
+    # def __init__(self):
+    #     super().__init__()
+    #     self.back_id = MainFormatter.NextBackId
+    #     self.back = BACKS[self.back_id]
+    #     MainFormatter.NextBackId = (MainFormatter.NextBackId+1)%len(BACKS)
 
 
     def formatMessage(self, record):
@@ -63,24 +94,22 @@ class DriverFormatter(logging.Formatter):
         # output += record.threadName + "."
         output += level_highlighter(record.levelname.ljust(8, ' '), level_patterns)
         output += "| "
-        output += Style.BRIGHT + self.back + record.name + Style.RESET_ALL + "."
         output += debug + hmsg
 
         return output
 
 
-
-
-def driver_logger(driver_name):
+def attribute_logger(attribute_name):
 
     ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    ch.setFormatter(DriverFormatter())
+    ch.setLevel(PZA_LOG_LEVEL)
+    ch.setFormatter(MainFormatter())
 
-    __logger = logging.getLogger(driver_name)
-    __logger.setLevel(logging.DEBUG)
+    __logger = logging.getLogger(attribute_name)
+    __logger.setLevel(PZA_LOG_LEVEL)
     __logger.addHandler(ch)
 
     return __logger
+
 
 

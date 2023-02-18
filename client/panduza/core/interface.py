@@ -20,9 +20,11 @@ class Interface:
     port : int = None
     topic : str = None
     client : object = None
-    
+    ensure: bool = True
+
     def __post_init__(self):
-        self._initialized = False
+
+        self._attribute_names = [] # authorized attribute names
 
         self.init(self.alias, self.addr, self.port, self.topic, self.client)
 
@@ -31,11 +33,12 @@ class Interface:
             AttributeInfo()
         )
 
-    ###########################################################################
-    ###########################################################################
+    # ---
 
     def init(self, alias=None, addr=None, port=None, topic=None, client=None):
         """Initialization of the interface
+
+        **MUST BE KEPT FOR LATE INIT**
         """
         # Wait for later initialization
         if alias==None and addr==None and port==None and topic==None and client==None:
@@ -59,31 +62,40 @@ class Interface:
         if not self.client.is_connected:
             self.client.connect()
 
+    # ---
 
-        # Initialization ok
-        self._initialized = True
+    def ensure_init(self):
+        """Ensure that the interface has been initialized by the broker
+        """
+        for att in self._attribute_names:
+            obj = getattr(self, att)
+            obj.ensure_init()
 
+    # ---
 
+    def get_short_name(self):
+        if self.alias:
+            return self.alias
+        else:
+            return self.topic.split('/')[-1]
 
-    ###########################################################################
-    ###########################################################################
+    # ---
 
     def add_attribute(self, attribute):
         # Append fields as attributes
         attribute.set_interface(self)
         setattr(self, attribute.name, attribute)
+        self._attribute_names.append(attribute.name)
         return attribute
 
-    ###########################################################################
-    ###########################################################################
+    # ---
 
     def payload_to_dict(self, payload):
         """ To parse json payload
         """
         return json.loads(payload.decode("utf-8"))
 
-    ###########################################################################
-    ###########################################################################
+    # ---
 
     def payload_to_int(self, payload):
         """

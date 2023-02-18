@@ -39,11 +39,14 @@ class Serial(Interface):
     """Interface to manage power supplies
     """
 
+    # ---
+
     def __init__(self, alias=None, addr=None, port=None, topic=None, client=None):
         """! Constructor
         """
         super().__init__(alias, addr, port, topic, client)
 
+    # ---
 
     def _post_initialization(self):
         """! Declare attributes here
@@ -63,12 +66,14 @@ class Serial(Interface):
             )
         )
 
+    # ---
 
     def write(self, tx_data: bytes):
         tx_encoded = base64.b64encode(tx_data)
         base64_message = tx_encoded.decode('ascii')
         self.data.tx.set(base64_message)
 
+    # ---
 
     def read(self, size = None):
         return self.data.read(size)

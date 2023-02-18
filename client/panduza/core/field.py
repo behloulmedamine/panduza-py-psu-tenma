@@ -38,11 +38,9 @@ class Field:
 class RoField(Field):
     
     def get(self):
+        """Attribute is the one holding the data
         """
-        """
-        # self.attribute.set(**{self.name: val})
-        pass
-
+        return self.attribute.get(self.name)
 
 # -----------------------------------------------------------------------------
 

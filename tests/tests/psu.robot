@@ -9,7 +9,7 @@ Suite Setup         Setup Bench Config
 *** Test Cases ***
 
 Turn on and off the Power Supply
-    Turn on power supply       psu_1    True
+    Turn on power supply       psu_1
     Power Supply Should Be    psu_1    on
-
-
+    Turn off power supply       psu_1
+    Power Supply Should Be    psu_1    off

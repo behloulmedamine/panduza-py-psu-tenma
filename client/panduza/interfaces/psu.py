@@ -11,14 +11,6 @@ class Psu(Interface):
 
     interface:Interface = None
     
-
-    # def __init__(self, alias=None, addr=None, port=None, topic=None, client=None):
-    #     """! Constructor
-    #     """
-    #     super().__init__(alias, addr, port, topic, client)
-        # print("__init__")
-
-
     def __post_init__(self):
 
         if self.alias:
@@ -63,4 +55,7 @@ class Psu(Interface):
                 name = "value"
             )
         )
+
+        if self.ensure:
+            self.ensure_init()
 

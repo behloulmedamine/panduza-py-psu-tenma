@@ -1,15 +1,19 @@
 import os
 import json
+import time
 import logging
 import threading
 
 from abc import ABC, abstractmethod
 from typing      import Optional, Callable, Set
 from dataclasses import dataclass, field
+from typing      import ClassVar
 
 from .client import Client
 
 from .helper import topic_join
+
+from .log import attribute_logger
 
 # -----------------------------------------------------------------------------
 
@@ -29,49 +33,116 @@ class EnsureError(Exception):
 class Attribute:
     name: str
     interface = None
+    retain: bool = True
+    ENSURE_TIMEOUT: ClassVar[float] = 5.0 # seconds
 
-    
+    # ---
+
     def __post_init__(self):
         """Initialize topics and logging
         """
-        self._log = logging.getLogger(f"att={self.name}")
-        self._field_data = {}
+        self._log = attribute_logger(self.name)
+        self._lhead = f"<?.{self.name}>"
+        
+        self._field_names = [] # authorized field names
 
+        self._field_data = {}
+        self._field_data_lock = threading.Lock()
+
+        self._update_event = threading.Event()
+        self._update_event.clear()
+
+    # ---
 
     def set_interface(self, interface):
+        """Attach this attribute to the interface
+        """
+        # Attach interface
         self.interface = interface
+        self._lhead = f"<{self.interface.get_short_name()}.{self.name}>"
         self._topic_atts = topic_join(self.interface.topic, "atts", self.name)
         self._topic_cmds_set = topic_join(self.interface.topic, "cmds", "set")
 
         # Subscribe to topic
-        self._log.debug(f"topic atts : {self._topic_atts}")
+        self._log.debug(f"{self._lhead} subscribe to topic atts : %{self._topic_atts}%")
         self.interface.client.subscribe(self._topic_atts, callback=self._on_att_message)
 
-        # print("sub \n", self._topic_atts)
+    # ---
 
-    def _on_att_message(self, topic, payload):
-        self._log.info(f"Received new value {payload}")
-        # print("Received new value\n")
+    def ensure_init(self):
+        """Ensure that the interface has been initialized by the broker
+        """
+        # Do not need to check if the attribute is not retained
+        if not self.retain:
+            return
 
-    #     if payload is None:
-    #         self.__value = None
-    #     else:
-    #         self.__value = self.payload_parser(payload)
-    #         self.__trigger.set()
+        # 
+        self._log.debug(f"{self._lhead}ENSURE INIT")
+        self._update_event.clear()
+        start_time = time.perf_counter()
+
+        while (
+            not self._field_data and
+            (time.perf_counter()-start_time) < Attribute.ENSURE_TIMEOUT
+            ):
+            remaining_time = Attribute.ENSURE_TIMEOUT - (time.perf_counter()-start_time)
+            # self._log.debug(f'remaining {remaining_time:0.6f} seconds')
+            self._update_event.wait(remaining_time)
+        
+        if time.perf_counter()-start_time >= Attribute.ENSURE_TIMEOUT:
+            raise EnsureError(f"{self._lhead} initial data not recieved for field '{self.name}'")
+
+    # ---
     
+    def _on_att_message(self, topic, payload):
+        """Triggered when a new message is received
+
+        !!! WORK ON MQTT CLIENT THREAD !!!
+        """
+        # Debug
+        self._log.debug(f"{self._lhead}MSG_IN < %{topic}% {payload}")
+
+        # Parse
+        payload_dict = json.loads(payload.decode("utf-8"))
+
+        # Control
+        if self.name not in payload_dict:
+            self._log.warning(f"{self._lhead}bad format for attribute payload")
+            return
+
+        # Update
+        field_update = payload_dict.get(self.name, {})
+        with self._field_data_lock:
+            for field, update in field_update.items():
+                self._field_data[field] = update
+                self._log.debug(f"{self._lhead}UPDATE < {field}={self._field_data[field]}")
+                # self._log.debug(f"{self._lhead}ALL FIELDS < {self._field_data}")
+                
+        # Thread trigger
+        self._update_event.set()
+
+    # ---
 
     def add_field(self, field):
         """Append a field to the attribute
         """
         field.set_attribute(self)
         setattr(self, field.name, field)
+        with self._field_data_lock:
+            self._field_names.append(field.name)
         return self
 
     # ---
 
-    @abstractmethod
-    def get(self):
-        pass
+    def get(self, field):
+        """Return the value localy stored
+        """
+        with self._field_data_lock:
+            if not (field in self._field_names):
+                self._log.warning(f"{self._lhead} has no field {field}")
+                return None
+            # self._log.debug(f"{self._lhead} get('{field}') {type(self._field_data)} {self._field_data[field]}")
+            return self._field_data.get(field)
 
     # ---
 
@@ -79,7 +150,7 @@ class Attribute:
         """Send a set command
         """
         # Get ensure flag
-        ensure=kwargs.get('ensure', False)
+        ensure=kwargs.get('ensure', True)
 
         # Prepare the payload
         kwargs.pop('ensure', None)
@@ -95,8 +166,33 @@ class Attribute:
 
         # If ensure flag is set, wait for it
         if ensure:
-            while True:
-                pass
+            self._update_event.clear()
+            start_time = time.perf_counter()
+            self._log.debug(f'wait to ensure the request is applied')
+
+            while (
+                not self.update_ack(kwargs) and
+                (time.perf_counter()-start_time) < Attribute.ENSURE_TIMEOUT
+                ):
+
+                remaining_time = Attribute.ENSURE_TIMEOUT - (time.perf_counter()-start_time)
+                self._log.debug(f'remaining {remaining_time:0.6f} seconds')
+                self._update_event.wait(remaining_time)
+
+            if time.perf_counter()-start_time >= Attribute.ENSURE_TIMEOUT:
+                raise EnsureError(f"{self._lhead} {kwargs}")
+
+    # ---
+
+    def update_ack(self, expected_data):
+
+        self._log.debug(f'update_ack {expected_data} {self._field_data}')
+
+        for key, value in expected_data.items():
+            if key not in self._field_data and self._field_data[key] != value:
+                return False
+
+        return True
 
 ###############################################################################
 ###############################################################################
@@ -106,6 +202,8 @@ class Attribute_JSON(Attribute):
     __value: any = None
 
     def __post_init__(self):
+
+        print("!!! DEPRECATED Attribute_JSON !!!")
         super().__post_init__()
 
         self.__trigger = threading.Event()
