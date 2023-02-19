@@ -121,7 +121,7 @@ class ConnectorModbusClientSerial(ConnectorModbusClientBase):
     def write_register(self, address: int, value, unit: int = 1):
         """
         """
-        response = self.client.write_register(address, value, unit=unit)
+        response = self.client.write_register(address, value, slave=unit)
         if response.isError():
             raise Exception(f'Error message: {response}')
 
@@ -131,7 +131,7 @@ class ConnectorModbusClientSerial(ConnectorModbusClientBase):
     def read_input_registers(self, address: int, size: int = 1, unit: int = 1):
         """
         """
-        response = self.client.read_input_registers(address, size, unit=unit)
+        response = self.client.read_input_registers(address, size, slave=unit)
         if not response.isError():
             return response.registers
         else:

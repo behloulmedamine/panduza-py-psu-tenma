@@ -1,45 +1,10 @@
+import time
 from ..meta_driver import MetaDriver
 
 
 class MetaDriverPsu(MetaDriver):
     """ Abstract Driver with helper class to manage power supply interface
     """
-
-    ###########################################################################
-    ###########################################################################
-    #
-    # Data and variables
-    #
-    ###########################################################################
-    ###########################################################################
-
-    _state = {
-        "value": "off"
-    }
-
-    _volts = {
-        "goal": 0,
-        "real": 0,
-        "min": 0,
-        "max": 0
-    }
-
-    _amps = {
-        "goal": 0,
-        "real": 0,
-        "min": 0,
-        "max": 0
-    }
-
-    _misc = {
-        "model": "",
-        "serial": ""
-    }
-
-    _settings = {
-        "ovp": False,
-        "ocp": False,
-    }
 
     ###########################################################################
     ###########################################################################
@@ -178,27 +143,21 @@ class MetaDriverPsu(MetaDriver):
     # ---
 
     def _PZADRV_loop_init(self, tree):
-
         self.__cmd_handlers = {
             "state": self.__handle_cmds_set_state,
             "volts": self.__handle_cmds_set_volts,
             "amps": self.__handle_cmds_set_amps,
             "settings": self.__handle_cmds_set_settings
         }
-
-        self._update_attributes_from_dict({
-            "state": {
-                "value": self._PZADRV_PSU_read_state_value()
-            }
-        })
-        
-
         self._pzadrv_init_success()
 
     # ---
 
     def _PZADRV_loop_run(self):
-        pass
+        self.__update_attribute_state()
+        self.__update_attribute_volts()
+        self.__update_attribute_amps()
+        time.sleep(0.5)
 
     # ---
 
@@ -219,6 +178,21 @@ class MetaDriverPsu(MetaDriver):
     ###########################################################################
     ###########################################################################
 
+    def __update_attribute_state(self):
+        self._update_attribute("state", "value", self._PZADRV_PSU_read_state_value())
+
+    # ---
+
+    def __update_attribute_volts(self):
+        self._update_attribute("volts", "goal", self._PZADRV_PSU_read_volts_goal())
+
+    # ---
+
+    def __update_attribute_amps(self):
+        self._update_attribute("amps", "goal", self._PZADRV_PSU_read_amps_goal())
+
+    # ---
+    
     def __handle_cmds_set_state(self, cmd_att):
         """
         """

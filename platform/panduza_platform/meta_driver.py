@@ -271,15 +271,21 @@ class MetaDriver(metaclass=abc.ABCMeta):
     ###########################################################################
 
     def _update_attribute(self, attribute, field, value, push=True):
-        """Function that update an attribute field
+        """Function that update only one attribute field
         """
+        # Create attribute if not exist
         if not ( attribute in self.__drv_atts ):
             self.__drv_atts[attribute] = dict()
-        self.__drv_atts[attribute][field] = value
-        # Push if requested
-        if push:
-            self._push_attribute(attribute)
+        
+        # Update only if the value changed
+        __att = self.__drv_atts[attribute]
+        if not (field in __att) or __att[field] != value:
+            __att[field] = value
+            # Then push only if requested
+            if push:
+                self._push_attribute(attribute)
 
+    # ---
 
     def _update_attributes_from_dict(self, change_dict, push=True):
         """
@@ -290,6 +296,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
             if push:
                 self._push_attribute(attribute)
 
+    # ---
 
     def _get_field(self, attribute, field):
         """

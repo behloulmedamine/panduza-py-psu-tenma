@@ -25,33 +25,31 @@ class DriverPsuFake(MetaDriverPsu):
 
     def _PZADRV_loop_init(self, tree):
 
-        # Init fake values
-        self._state["value"] = "off"
 
-        self._volts["goal"] = 0
-        self._volts["real"] = 0
-        self._volts["min"] = -1000
-        self._volts["max"] = 1000
+        # self._misc["model"] = "PFPS-SN42 (Panduza Fake Power Supply)"
 
-        self._amps["goal"] = 0
-        self._amps["real"] = 0
-        self._amps["min"] = 0
-        self._amps["max"] = 50
+        # self._settings["ovp"] = False
+        # self._settings["ocp"] = False
 
-        self._misc["model"] = "PFPS-SN42 (Panduza Fake Power Supply)"
-
-        self._settings["ovp"] = False
-        self._settings["ocp"] = False
 
         self.__fakes = {
-            "state": self._state,
-            "volts": self._volts,
-            "amps": self._amps,
-            "misc": self._misc
+            "state": {
+                "value": "off"
+            },
+            "volts": {
+                "goal": 0,
+                "real": 0,
+                "min": -1000,
+                "max":  1000,
+            },
+            "amps": {
+                "goal":  0,
+                "real":  0,
+                "min":   0,
+                "max":  50,
+            },
+            # "misc": self._misc
         }
-
-        # Constants Fields settings
-        self._update_attributes_from_dict(self.__fakes)
 
         # Call meta class PSU ini
         super()._PZADRV_loop_init(tree)
@@ -77,55 +75,56 @@ class DriverPsuFake(MetaDriverPsu):
 
     def _PZADRV_PSU_read_state_value(self):
         self.log.info(f"read state !")
-        return self._state["value"]
+        return self.__fakes["state"]["value"]
 
     ###########################################################################
     ###########################################################################
 
     def _PZADRV_PSU_write_state_value(self, v):
         self.log.info(f"write state : {v}")
-        self._state["value"] = v
+        self.__fakes["state"]["value"] = v
 
     ###########################################################################
     ###########################################################################
 
     def _PZADRV_PSU_read_volts_goal(self):
         self.log.info(f"read volts goal !")
-        return self._volts["goal"]
+        return self.__fakes["volts"]["goal"]
 
     ###########################################################################
     ###########################################################################
 
     def _PZADRV_PSU_write_volts_goal(self, v):
         self.log.info(f"write volts : {v}")
-        self._volts["goal"] = v
-        self._volts["real"] = v
+        self.__fakes["volts"]["goal"] = v
+        self.__fakes["volts"]["real"] = v
     
     ###########################################################################
     ###########################################################################
 
     def _PZADRV_PSU_read_volts_real(self):
         self.log.info(f"read volts real !")
-        return self._volts["real"]
+        return self.__fakes["volts"]["real"]
 
     ###########################################################################
     ###########################################################################
 
     def _PZADRV_PSU_read_amps_goal(self):
         self.log.info(f"read amps goal !")
-        return self._amps["goal"]
+        return self.__fakes["amps"]["goal"]
 
     ###########################################################################
     ###########################################################################
 
     def _PZADRV_PSU_write_amps_goal(self, v):
         self.log.info(f"write amps : {v}")
-        self._amps["goal"] = v
-        self._amps["real"] = v
+        self.__fakes["amps"]["goal"] = v
+        self.__fakes["amps"]["real"] = v
 
     ###########################################################################
     ###########################################################################
 
     def _PZADRV_PSU_read_amps_real(self):
         self.log.info(f"read amps real !")
-        return self._amps["real"]
+        return self.__fakes["amps"]["real"]
+
