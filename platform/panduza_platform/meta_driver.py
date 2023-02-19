@@ -54,6 +54,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
         self._tree = tree
 
         # Store attribute representation
+        # Contains all the attributes and fields of the driver class in dict
         self.__drv_atts = { }
 
         # Current state of the driver

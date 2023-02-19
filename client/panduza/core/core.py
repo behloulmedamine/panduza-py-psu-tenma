@@ -171,7 +171,6 @@ class Core:
 
     def EnableLogging(level=logging.DEBUG):
         panduza.core.log.PZA_LOG_LEVEL = level
-        for name, logger in logging.Logger.manager.loggerDict.items():    
-            logging.getLogger(name).setLevel(panduza.core.log.PZA_LOG_LEVEL)
+        logging.getLogger().setLevel(panduza.core.log.PZA_LOG_LEVEL)
 
 

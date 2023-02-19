@@ -13,7 +13,7 @@ from .client import Client
 
 from .helper import topic_join
 
-from .log import attribute_logger
+from .log import create_logger
 
 # -----------------------------------------------------------------------------
 
@@ -41,9 +41,12 @@ class Attribute:
     def __post_init__(self):
         """Initialize topics and logging
         """
-        self._log = attribute_logger(self.name)
-        self._lhead = f"<?.{self.name}>"
-        
+        self.counter = 0
+
+        self._log = create_logger(self.name)
+        self._lhead = f"<?.{self.name} {id(self)}>"
+        self._log.debug(f"{self._lhead} NEW attribute retain={self.retain}")
+
         self._field_names = [] # authorized field names
 
         self._field_data = {}
@@ -59,6 +62,7 @@ class Attribute:
         """
         # Attach interface
         self.interface = interface
+        self._log.debug(f"{self._lhead} attach to interface '{self.interface.get_short_name()}'")
         self._lhead = f"<{self.interface.get_short_name()}.{self.name}>"
         self._topic_atts = topic_join(self.interface.topic, "atts", self.name)
         self._topic_cmds_set = topic_join(self.interface.topic, "cmds", "set")

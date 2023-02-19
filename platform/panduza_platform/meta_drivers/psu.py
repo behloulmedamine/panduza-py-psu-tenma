@@ -186,6 +186,13 @@ class MetaDriverPsu(MetaDriver):
             "settings": self.__handle_cmds_set_settings
         }
 
+        self._update_attributes_from_dict({
+            "state": {
+                "value": self._PZADRV_PSU_read_state_value()
+            }
+        })
+        
+
         self._pzadrv_init_success()
 
     # ---

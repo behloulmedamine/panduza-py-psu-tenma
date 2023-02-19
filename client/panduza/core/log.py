@@ -91,7 +91,7 @@ class MainFormatter(logging.Formatter):
         hmsg = highlighter(hmsg, patterns, debug)
         
         output = ""
-        # output += record.threadName + "."
+        output += record.threadName.ljust(12, ' ')[:12] + "| "
         output += level_highlighter(record.levelname.ljust(8, ' '), level_patterns)
         output += "| "
         output += debug + hmsg
@@ -99,17 +99,21 @@ class MainFormatter(logging.Formatter):
         return output
 
 
-def attribute_logger(attribute_name):
 
-    ch = logging.StreamHandler()
-    ch.setLevel(PZA_LOG_LEVEL)
-    ch.setFormatter(MainFormatter())
+Initialized=False
+def create_logger(name):
 
-    __logger = logging.getLogger(attribute_name)
-    __logger.setLevel(PZA_LOG_LEVEL)
-    __logger.addHandler(ch)
+    __logger = logging.getLogger()
+
+    global Initialized
+    if not Initialized:
+        Initialized=True
+        ch = logging.StreamHandler()
+        ch.setFormatter(MainFormatter())
+        __logger.addHandler(ch)
 
     return __logger
+
 
 
 

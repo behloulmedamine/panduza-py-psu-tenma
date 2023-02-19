@@ -15,21 +15,25 @@ class AttributeInfo(Attribute):
 
     def __post_init__(self):
         super().__post_init__()
-        self.info = {}
-        self.last_update_time = None
-
-    def _on_att_message(self, topic, payload):
-        self.info = payload_to_dict(payload)['info']
-        self.last_update_time = time.time()
+        self.add_field(
+            RoField(
+                name = "type"
+            )
+        )
+        self.add_field(
+            RoField(
+                name = "state"
+            )
+        )
 
     def ping(self):
         # TODO just ping the given interface
         self.interface.client.publish("pza", b"*")
 
     def get_type(self):
-        return self.info.get("type", "unknown")
+        return self._field_data.get("type", "unknown")
 
     def get_state(self):
-        return self.info.get("state", "unknown")
+        return self._field_data.get("state", "unknown")
 
 

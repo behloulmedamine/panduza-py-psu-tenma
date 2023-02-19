@@ -9,6 +9,7 @@ from .client import Client
 from .helper import topic_join
 
 from .attribute_info import AttributeInfo
+from .log import create_logger
 
 @dataclass
 class Interface:
@@ -23,15 +24,21 @@ class Interface:
     ensure: bool = True
 
     def __post_init__(self):
+        """Constructor
+        """
+        # Log information
+        self._log = create_logger(self.get_short_name())
+        self._lhead = f"<{self.get_short_name()}>"
+        
+        # authorized attribute names
+        self._attribute_names = []
 
-        self._attribute_names = [] # authorized attribute names
-
-        self.init(self.alias, self.addr, self.port, self.topic, self.client)
-
-        # === INFO ===
-        self.add_attribute(
-            AttributeInfo()
-        )
+        # Try to init the interface
+        self.initialized = False
+        if( self.init(self.alias, self.addr, self.port, self.topic, self.client) ):
+            # === INFO ===
+            self.add_attribute( AttributeInfo() )
+            self.initialized = True
 
     # ---
 
@@ -39,10 +46,18 @@ class Interface:
         """Initialization of the interface
 
         **MUST BE KEPT FOR LATE INIT**
+
+        TODO REWORK NEED TO BE DONE HERE
         """
+        # Init Check
+        if self.initialized:
+            self._log.warning(f"{self._lhead} try to init this interface again")
+            return False
+
         # Wait for later initialization
         if alias==None and addr==None and port==None and topic==None and client==None:
-            return
+            self._log.warning(f"{self._lhead} cannot initialize interface no parameter provided")
+            return False
 
         #
         if client != None:
@@ -54,13 +69,18 @@ class Interface:
             if alias:
                 self.client = Client(interface_alias=alias)
                 self.topic  = Core.BaseTopicFromAlias(alias)
-            else:
+                self._log.debug(f"{self._lhead} NEW interface from alias %{self.topic}%")
+            elif topic:
                 self.topic  = topic
                 self.client = Client(url=addr, port=port)
+                self._log.debug(f"{self._lhead} NEW interface from topic %{self.topic}%")
 
-        # 
+        # Connection
         if not self.client.is_connected:
             self.client.connect()
+
+        # Ok init
+        return True
 
     # ---
 
@@ -68,6 +88,7 @@ class Interface:
         """Ensure that the interface has been initialized by the broker
         """
         for att in self._attribute_names:
+            self._log.debug(f"{self._lhead} ensure init of '{att}'")
             obj = getattr(self, att)
             obj.ensure_init()
 
@@ -82,10 +103,13 @@ class Interface:
     # ---
 
     def add_attribute(self, attribute):
-        # Append fields as attributes
-        attribute.set_interface(self)
-        setattr(self, attribute.name, attribute)
-        self._attribute_names.append(attribute.name)
+        """Append attribute to this interface only once
+        """
+        if not (attribute.name in self._attribute_names):
+            self._log.debug(f"{self._lhead} append {attribute} to {self._attribute_names}")
+            self._attribute_names.append(attribute.name)
+            attribute.set_interface(self)
+            setattr(self, attribute.name, attribute)
         return attribute
 
     # ---
