@@ -42,7 +42,7 @@ class Psu(Interface):
             )
         ).add_field(
             RwField(
-                name = "value"
+                name = "goal"
             )
         )
         # === VOLTS ===
@@ -52,7 +52,7 @@ class Psu(Interface):
             )
         ).add_field(
             RwField(
-                name = "value"
+                name = "goal"
             )
         )
 

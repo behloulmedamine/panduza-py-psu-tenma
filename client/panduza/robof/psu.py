@@ -55,10 +55,21 @@ class KeywordsPsu(object):
     ###########################################################################
 
     @keyword
-    def set_power_supply_voltage(self, name, voltage):
-        """
+    def set_power_supply_voltage_goal(self, name, voltage, ensure=True):
+        """Set the power supply voltage goal
         """
         pza = BuiltIn().get_variable_value("${__pza__}")
-        pza[name].volts.value.set(float(voltage))
+        pza[name].volts.goal.set(float(voltage), ensure)
+
+    ###########################################################################
+    # AMPS
+    ###########################################################################
+
+    @keyword
+    def set_power_supply_current_goal(self, name, current, ensure=True):
+        """Set the power supply amps goal
+        """
+        pza = BuiltIn().get_variable_value("${__pza__}")
+        pza[name].amps.goal.set(float(current), ensure)
 
 

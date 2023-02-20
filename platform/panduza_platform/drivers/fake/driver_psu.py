@@ -55,52 +55,39 @@ class DriverPsuFake(MetaDriverPsu):
         super()._PZADRV_loop_init(tree)
 
     ###########################################################################
-    ###########################################################################
-
-    def _PZADRV_loop_run(self):
-        """
-        """
-        pass
-
-    ###########################################################################
-    ###########################################################################
-
-    def _PZADRV_loop_err(self):
-        """
-        """
-        pass
-
-    ###########################################################################
-    ###########################################################################
 
     def _PZADRV_PSU_read_state_value(self):
         self.log.info(f"read state !")
         return self.__fakes["state"]["value"]
 
-    ###########################################################################
-    ###########################################################################
+    # ---
 
     def _PZADRV_PSU_write_state_value(self, v):
         self.log.info(f"write state : {v}")
         self.__fakes["state"]["value"] = v
 
     ###########################################################################
-    ###########################################################################
 
     def _PZADRV_PSU_read_volts_goal(self):
         self.log.info(f"read volts goal !")
         return self.__fakes["volts"]["goal"]
 
-    ###########################################################################
-    ###########################################################################
+    # ---
 
     def _PZADRV_PSU_write_volts_goal(self, v):
         self.log.info(f"write volts : {v}")
         self.__fakes["volts"]["goal"] = v
         self.__fakes["volts"]["real"] = v
     
-    ###########################################################################
-    ###########################################################################
+    # ---
+
+    def _PZADRV_PSU_volts_goal_min_max(self):
+        return {
+            "min": self.__fakes["volts"]["min"],
+            "max": self.__fakes["volts"]["max"] 
+        }
+
+    # ---
 
     def _PZADRV_PSU_read_volts_real(self):
         self.log.info(f"read volts real !")
@@ -113,16 +100,22 @@ class DriverPsuFake(MetaDriverPsu):
         self.log.info(f"read amps goal !")
         return self.__fakes["amps"]["goal"]
 
-    ###########################################################################
-    ###########################################################################
+    # ---
 
     def _PZADRV_PSU_write_amps_goal(self, v):
         self.log.info(f"write amps : {v}")
         self.__fakes["amps"]["goal"] = v
         self.__fakes["amps"]["real"] = v
 
-    ###########################################################################
-    ###########################################################################
+    # ---
+
+    def _PZADRV_PSU_amps_goal_min_max(self):
+        return {
+            "min": self.__fakes["amps"]["min"],
+            "max": self.__fakes["amps"]["max"] 
+        }
+
+    # ---
 
     def _PZADRV_PSU_read_amps_real(self):
         self.log.info(f"read amps real !")

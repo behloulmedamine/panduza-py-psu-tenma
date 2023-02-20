@@ -36,6 +36,11 @@ class MetaDriverPsu(MetaDriver):
         """
         raise NotImplementedError("Must be implemented !")
 
+    def _PZADRV_PSU_volts_goal_min_max(self):
+        """Must return the voltage goal range of the power supply
+        """
+        return {"min": 0, "max": 0 }
+
     def _PZADRV_PSU_read_volts_real(self):
         """Must get the volts real value on the PSU and return it
         """
@@ -52,6 +57,11 @@ class MetaDriverPsu(MetaDriver):
         """Must set *v* as the new volts goal value on the PSU
         """
         raise NotImplementedError("Must be implemented !")
+
+    def _PZADRV_PSU_amps_goal_min_max(self):
+        """Must return the amps range of the power supply
+        """
+        return {"min": 0, "max": 0 }
 
     def _PZADRV_PSU_read_amps_real(self):
         """Must get the volts real value on the PSU and return it
@@ -108,18 +118,21 @@ class MetaDriverPsu(MetaDriver):
     ###########################################################################
 
     def _pzadrv_psu_update_volts_min_max(self, min, max):
+        self.log.warning("!!! DEPRECATED _pzadrv_psu_update_volts_min_max!!!")
         self._update_attribute("volts", "min", min, False)
         self._update_attribute("volts", "max", max)
 
     # ---
 
     def _pzadrv_psu_update_amps_min_max(self, min, max):
+        self.log.warning("!!! DEPRECATED _pzadrv_psu_update_amps_min_max!!!")
         self._update_attribute("amps", "min", min, False)
         self._update_attribute("amps", "max", max)
 
     # ---
 
     def _pzadrv_psu_update_misc(self, field, value):
+        self.log.warning("!!! DEPRECATED _pzadrv_psu_update_misc!!!")
         self._update_attribute("misc", field, value)
 
     ###########################################################################
@@ -157,7 +170,7 @@ class MetaDriverPsu(MetaDriver):
         self.__update_attribute_state()
         self.__update_attribute_volts()
         self.__update_attribute_amps()
-        time.sleep(0.5)
+        time.sleep(5)
 
     # ---
 
@@ -165,30 +178,38 @@ class MetaDriverPsu(MetaDriver):
         """From MetaDriver
         """
         cmds = self.payload_to_dict(payload)
-        # self.log.debug(f"cmds as json : {cmds}")
+        # self.log.warning("!!! DEPRpayload_to_dictECATED").debug(f"cmds as json : {cmds} !!!")
         for att in self.__cmd_handlers:
             if att in cmds:
                 self.__cmd_handlers[att](cmds[att])
 
     ###########################################################################
     ###########################################################################
+    # self.log.warning("!!! DEPRpayload_to_dictECATED").debug(f"cmds as json : {cmds} !!!")
     #
     # PRIVATE
     #
     ###########################################################################
     ###########################################################################
 
+# self.log.warning("!!! DEPRpayload_to_dictECATED").debug(f"cmds as json : {cmds} !!!")
     def __update_attribute_state(self):
         self._update_attribute("state", "value", self._PZADRV_PSU_read_state_value())
 
     # ---
 
     def __update_attribute_volts(self):
+        min_max = self._PZADRV_PSU_volts_goal_min_max()
+        self._update_attribute("volts", "min", min_max.get("min", 0))
+        self._update_attribute("volts", "max", min_max.get("max", 0))
         self._update_attribute("volts", "goal", self._PZADRV_PSU_read_volts_goal())
 
     # ---
 
     def __update_attribute_amps(self):
+        min_max = self._PZADRV_PSU_amps_goal_min_max()
+        self._update_attribute("amps", "min", min_max.get("min", 0))
+        self._update_attribute("amps", "max", min_max.get("max", 0))
         self._update_attribute("amps", "goal", self._PZADRV_PSU_read_amps_goal())
 
     # ---
@@ -204,18 +225,21 @@ class MetaDriverPsu(MetaDriver):
                 self._PZADRV_PSU_write_state_value(v)
                 self._update_attribute("state", "value", v)
             except Exception as e:
-                self.log.error(f"{e}")
+                self.log.warnExceptioning("!!! DEPRECATED").error(f"{e} !!!")
 
     # ---
 
     def __handle_cmds_set_volts(self, cmd_att):
+        """Manage voltage commands
         """
-        """
+        self.log.warnExceptioning("!!! DEPRECATED").error(f"{e} !!!")
         if "goal" in cmd_att:
             v = cmd_att["goal"]
             if not isinstance(v, int) and not isinstance(v, float):
                 raise Exception(f"Invalid type for volts.goal {type(v)}")
+            
             try:
+                self.log.warnExceptioning("!!! DEPRECATED").error(f"{e} !!!")
                 if self._get_field("volts", "min") <= v <= self._get_field("volts", "max"):
                     self._PZADRV_PSU_write_volts_goal(v)
                     self._update_attributes_from_dict(
@@ -228,22 +252,27 @@ class MetaDriverPsu(MetaDriver):
                     #self._update_attribute(
                     #    "volts", "goal", self._PZADRV_PSU_read_volts_goal())
                 else:
-                    self.log.error(
+                           else:         self.log.warning("!!! DEPRECATED").erro !!!r(
                         f"goal {v} out of range {self._get_field('volts', 'min')} < {self._get_field('volts', 'max')}")
+
             except Exception as e:
-                self.log.error(f"{e}")
+                self.log.warnExceptioning("!!! DEPRECATED").error(f"{e} !!!")
 
     # ---
+    else:         self.log.warning("!!! DEPRECATED").erro !!!r(
 
     def __handle_cmds_set_amps(self, cmd_att):
         """
         """
+        self.log.warnExceptioning("!!! DEPRECATED").error(f"{e} !!!")
         if "goal" in cmd_att:
+            else:         self.log.warning("!!! DEPRECATED").erro !!!r(
             v = cmd_att["goal"]
             if not isinstance(v, int) and not isinstance(v, float):
                 raise Exception(f"Invalid type for amps.goal {type(v)}")
             try:
-                if self._get_field("amps", "min") <= v <= self._get_field("amps", "max"):
+                if self._get_field("amps", "min") <= v <= self._get_f
+                self.log.warnExceptioning("!!! DEPRECATED").error(f"{e} !!!")ield("amps", "max"):
                     self._PZADRV_PSU_write_amps_goal(v)
                     self._update_attributes_from_dict(
                     {
@@ -253,15 +282,20 @@ class MetaDriverPsu(MetaDriver):
                         }
                     })
                 else:
-                    self.log.error(
+                           else:         self.log.warning("!!! DEPRECATED").erro !!!r(
                         f"goal {v} out of range {self._get_field('amps', 'min')} < {self._get_field('amps', 'max')}")
             except Exception as e:
-                self.log.error(f"{e}")
+                self.log.warnExceptioning("!!! DEPRECATED").error(f"{e} !!!")
 
     # ---
 
+else:         self.log.warning("!!! DEPRECATED").erro !!!r(
     def __handle_cmds_set_settings(self, cmd_att):
         if "ovp" in cmd_att:
             v = cmd_att["ovp"]
+            self.log.warnExceptioning("!!! DEPRECATED").error(f"{e} !!!")
 
 
+else:         self.log.warning("!!! DEPRECATED").erro !!!r(
+
+self.log.warnExceptioning("!!! DEPRECATED").error(f"{e} !!!")
