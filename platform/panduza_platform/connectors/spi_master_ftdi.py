@@ -114,7 +114,8 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                 # TODO spi est un port et non le SpiController !
                 self.spi.exchange(data)
 
-        def spi_read(self):
+        def spi_read(self, read_size):
                 """"""
                 self.log.debug("********** SPI READ CONNECTEUR **********")
-                self.data_read = self.spi.exchange()
+                self.data_read = self.spi.exchange(readlen = read_size)
+                self.log.debug(f"********** DATA READ = {self.data_read} **********")
