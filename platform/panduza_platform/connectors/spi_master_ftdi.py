@@ -93,7 +93,6 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                 self.spi = self.spi_master.get_port(cs = 0, freq = frequency, mode = mode)
                 
                 self.log.debug(f"********** ARGUMENTS {usb_serial_id} {port} {frequency} {cs_count} {polarity} {phase} {mode} **********")
-                self.spi.exchange([0xca, 0xfe])
                 
                 # self.spi_ports = [None] * cs_count
                 # for i in range(0, cs_count) :
@@ -113,7 +112,8 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                 # TODO spi est un port et non le SpiController !
                 self.spi.exchange(data)
 
-        def spi_read(self):
+        def spi_read(self, read_size):
                 """"""
                 self.log.debug("********** SPI READ CONNECTEUR **********")
-                self.data_read = self.spi.exchange()
+                self.data_read = self.spi.exchange(readlen = read_size)
+                self.log.debug(f"********** DATA READ = {self.data_read} **********")

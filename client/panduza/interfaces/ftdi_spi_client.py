@@ -44,6 +44,6 @@ class Ftdi_Spi(Interface):
 			)
  		).add_field(
 		 	RwField(
-		 	name = "value"
+		 	name = "values"
 			)
 		)

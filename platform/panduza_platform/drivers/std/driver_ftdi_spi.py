@@ -34,7 +34,7 @@ class DriverFtdiSpi(MetaDriver):
 
 
                 # Get the gate
-                self.ftdiSpi = ConnectorSPIMasterFTDI.Get(
+                self.spi_connector = ConnectorSPIMasterFTDI.Get(
                         usb_serial_id=settings["usb_serial_id"],
                         port=settings["port"],
                         polarity=settings["polarity"],
@@ -84,14 +84,6 @@ class DriverFtdiSpi(MetaDriver):
         ###########################################################################
         ###########################################################################
 
-        # TODO c'est probablement pas bon write read
-        # TODO que faire avec les data ?
-        # def _PZADRV_SPI_read(self) :
-        #         return self.ftdiSpi.spi_read()
-
-        # def _PZADRV_SPI_write(self, data) :
-        #         self.ftdiSpi.spi_write(data)
-
         def __handle_cmd_write(self, cmd_att) :
                 """
                 """
@@ -102,8 +94,8 @@ class DriverFtdiSpi(MetaDriver):
                         values = cmd_att["values"]
                         try:
                                 self.log.debug("********** 222222222222 **********")
-                                self.log.debug(f"spi write data {values} type : {type(values[1])}")
-                                self.ftdiSpi.spi_write(values)
+                                # self.log.debug(f"spi write data {values} type : {type(values[1])}")
+                                self.spi_connector.spi_write(values)
                                 # TODO give the cs the spi write
                                 # self._update_attribute("state", "value", v)
                         except Exception as e:
@@ -111,11 +103,19 @@ class DriverFtdiSpi(MetaDriver):
                                 self.log.error(f"{e}")
 
         #TODO FAIRE READ
-        def __handle_cmd_read(self) :
+        def __handle_cmd_read(self, cmd_att) :
                 """
                 """
-                try:
-                        self.log.debug(f"spi read data ")
-                        self.ftdiSpi.spi_read()
-                except Exception as e:
-                        self.log.error(f"{e}")
+                self.log.debug("********** __HANDLE_CMD_READ **********")
+                self.log.debug(f"CMD_ATT = {cmd_att}")
+                if "values" in cmd_att:
+                        self.log.debug("********** 1111111111111111111 **********")
+                        values = cmd_att["values"]
+                        try:
+                                self.log.debug(f"spi read data ")
+
+                                self.spi_connector.spi_read(values)
+                                self._update_attribute("read", "value", list(self.spi_connector.data_read))
+
+                        except Exception as e:
+                                self.log.error(f"in __handle_cmd_read : {e}")
