@@ -6,7 +6,7 @@ import pyftdi.spi as Spi
 from pyftdi.ftdi import Ftdi
 from pyftdi.usbtools import UsbToolsError
 from .udev_tty import TTYPortFromUsbInfo
-from typing import Mapping
+
 
 # enum SpiPolarity
 SPI_POL_RISING_FALLING = 0
@@ -58,7 +58,6 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
 
                 # Return the previously created
                 return ConnectorSPIMasterFTDI.__instances[port_name]
-
 
         def __init__(self, key: str = None, usb_serial_id: str = None, port: str = None, frequency : float = 1E6, cs_count : int = 1, polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP) :
                 """Constructor
