@@ -29,7 +29,6 @@ class DriverFtdiSpi(MetaDriver):
 
         def _PZADRV_loop_init(self, tree):
                 # self.log.debug(f"{tree}")
-                self.log.debug("********** _PZADRV_loop_ini FTDI SPI **********")
                 settings = tree["settings"]
 
 
@@ -82,6 +81,8 @@ class DriverFtdiSpi(MetaDriver):
 
         def __handle_cmd_write(self, cmd_att) :
                 """
+                Command handler for the write function
+                Called when the user writes in the write attribute
                 """
                 self.log.debug(f"CMD_ATT = {cmd_att}")
                 if "values" in cmd_att:
@@ -94,13 +95,13 @@ class DriverFtdiSpi(MetaDriver):
 
         def __handle_cmd_read(self, cmd_att) :
                 """
+                Command handler for the write function
+                Called when the user writes in the read attribute
                 """
                 self.log.debug(f"CMD_ATT = {cmd_att}")
                 if "values" in cmd_att:
                         values = cmd_att["values"]
                         try:
-                                self.log.debug(f"spi read data ")
-
                                 self.spi_connector.spi_read(values)
                                 self._update_attribute("read", "values", list(self.spi_connector.data_read))
 

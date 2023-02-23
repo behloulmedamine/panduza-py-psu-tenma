@@ -31,13 +31,15 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
         ###########################################################################
         ###########################################################################
 
+        # WARNING : bitorder argument is not used
+        # It seems unsuported by pyftdi
         @staticmethod
         def Get(usb_vendor_id: str = None, usb_product_id: str = None, usb_serial_id: str = None, usb_base_dev_tty: str ="/dev/ttyACM", port: str = None, frequency : float = 1E6, cs_count : int = 1, polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP, bitorder: int = SPI_BITORDER_MSB) :
                 """
                 Singleton main getter
                 Get metadata to identify device (vendor_id, product_id ...)
+                Returns the corresponding connector instance
                 """
-                log = logger.debug("********** GET FTDI SPI **********")
                 port_name = ""
                 if port != "":
                         port_name = port
@@ -92,10 +94,18 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                 # self.client.close(freeze = true)
 
 
+        # TODO should add the cs value in these functions
         def spi_write(self, data):
-                """"""
+                """
+                Write function of the connector
+                Calls the write function of the driver
+                """
                 self.spi.write(data)
 
+        # TODO should add the cs value in these functions
         def spi_read(self, read_size):
-                """"""
+                """
+                Read function of the connector
+                Calls the read function of the driver
+                """
                 self.data_read = self.spi.read(readlen = read_size)
