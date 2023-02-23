@@ -27,7 +27,7 @@ class DriverFtdiSpi(MetaDriver):
         ###########################################################################
         ###########################################################################
 
-        def _PZADRV_loop_ini(self, tree):
+        def _PZADRV_loop_init(self, tree):
                 # self.log.debug(f"{tree}")
                 self.log.debug("********** _PZADRV_loop_ini FTDI SPI **********")
                 settings = tree["settings"]
@@ -39,7 +39,6 @@ class DriverFtdiSpi(MetaDriver):
                         port=settings["port"],
                         polarity=settings["polarity"],
                         phase=settings["phase"]
-                        # bitorder=settings["bitorder"] TODO
                 )
 
 
@@ -48,10 +47,7 @@ class DriverFtdiSpi(MetaDriver):
                         "read" : self.__handle_cmd_read
                 }
 
-                # self._update_attribute("phase") TODO
-                # self._update_attribute("")
-
-                self._pzadrv_ini_success()
+                self._pzadrv_init_success()
 
         ###########################################################################
         ###########################################################################
@@ -87,35 +83,26 @@ class DriverFtdiSpi(MetaDriver):
         def __handle_cmd_write(self, cmd_att) :
                 """
                 """
-                self.log.debug("********** __HANDLE_CMD_WRITE **********")
                 self.log.debug(f"CMD_ATT = {cmd_att}")
                 if "values" in cmd_att:
-                        self.log.debug("********** 1111111111111111111 **********")
                         values = cmd_att["values"]
                         try:
-                                self.log.debug("********** 222222222222 **********")
-                                # self.log.debug(f"spi write data {values} type : {type(values[1])}")
+                                # TODO give the cs to the spi write
                                 self.spi_connector.spi_write(values)
-                                # TODO give the cs the spi write
-                                # self._update_attribute("state", "value", v)
                         except Exception as e:
-                                self.log.debug("********** 333333333333 **********")
                                 self.log.error(f"{e}")
 
-        #TODO FAIRE READ
         def __handle_cmd_read(self, cmd_att) :
                 """
                 """
-                self.log.debug("********** __HANDLE_CMD_READ **********")
                 self.log.debug(f"CMD_ATT = {cmd_att}")
                 if "values" in cmd_att:
-                        self.log.debug("********** 1111111111111111111 **********")
                         values = cmd_att["values"]
                         try:
                                 self.log.debug(f"spi read data ")
 
                                 self.spi_connector.spi_read(values)
-                                self._update_attribute("read", "value", list(self.spi_connector.data_read))
+                                self._update_attribute("read", "values", list(self.spi_connector.data_read))
 
                         except Exception as e:
                                 self.log.error(f"in __handle_cmd_read : {e}")

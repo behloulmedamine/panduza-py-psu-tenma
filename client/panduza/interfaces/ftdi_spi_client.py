@@ -24,6 +24,8 @@ class Ftdi_Spi(Interface):
 
 		super().__post_init__()
 
+		# TODO should have two RwField
+		# one for the data and one for the slave selector cs
 		# === WRITE ===
 		self.add_attribute(
 			Attribute(
@@ -35,8 +37,12 @@ class Ftdi_Spi(Interface):
 			)
 		)
 
-		# TODO FAIRE READ !
-		# mettre value le nb d'octet a lire ?
+		# TODO should have three RwField
+		# one for the cs, one for the size and one for the data
+		# cs is the slave selector so that the user can chose whichever slave they want to read/write
+		# size id the number of byte the user wants to read
+		# data is the data where the slave response is (RoField better ?)
+		# how to add a second field to an attribute ?
 		# === READ ===
 		self.add_attribute(
 			Attribute(

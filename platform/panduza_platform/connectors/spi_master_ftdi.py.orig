@@ -31,6 +31,7 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
         ###########################################################################
         ###########################################################################
 
+        # TODO warning : Expression of type "None" cannot be assigned to parameter of type "str"
         @staticmethod
         def Get(usb_vendor_id: str = None, usb_product_id: str = None, usb_serial_id: str = None, usb_base_dev_tty: str ="/dev/ttyACM", port: str = None, frequency : float = 1E6, cs_count : int = 1, polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP, bitorder: int = SPI_BITORDER_MSB) :
                 """
@@ -59,7 +60,11 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                 # Return the previously created
                 return ConnectorSPIMasterFTDI.__instances[port_name]
 
-
+        
+        # TODO CS_COUNT
+        # TODO apriori pas besoin des vendor et product id
+        # TODO comment rendre générique ?
+        # TODO bitorder: int = SPI_BITORDER_MSB ?
         def __init__(self, key: str = None, usb_serial_id: str = None, port: str = None, frequency : float = 1E6, cs_count : int = 1, polarity: int = SPI_POL_RISING_FALLING, phase: int = SPI_PHASE_SAMPLE_SETUP) :
                 """Constructor
                 """
@@ -69,7 +74,15 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
                         self.log = logger.bind(driver_name=key)
                         self.log.info(f"attached to the FTDI SPI Serial Connector")
 
-                # creates the spi master
+                self.log.debug("********** __INIT__ CONNECTEUR FTDI SPI **********")
+                # List Ftdi device URL
+                # try :
+                #         connected_ftdi_list = Ftdi.list_devices(f"ftdi://ftdi::{usb_serial_id}/{port}")
+                # except UsbToolsError as e :
+                #         raise Exception('Cannot find device').with_traceback(e.__traceback__)
+
+                # create controller object
+                # cs_count is the number of slaves
                 self.spi_master = Spi.SpiController(cs_count = cs_count)
 
                 self.spi_master.configure(f'ftdi://ftdi::{usb_serial_id}/{port}', frequency = frequency)
@@ -79,14 +92,13 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
 
                 # get_port creates a port whose number is cs and its parameters are the following args
                 self.spi = self.spi_master.get_port(cs = 0, freq = frequency, mode = mode)
+                
+                self.log.debug(f"********** ARGUMENTS {usb_serial_id} {port} {frequency} {cs_count} {polarity} {phase} {mode} **********")
+                
+                # self.spi_ports = [None] * cs_count
+                # for i in range(0, cs_count) :
+                #         self.spi_ports[i] = self.client.get_port(cs = i, frequency = frequency[i], mode = mode[i])
 
-                # TODO add multiple slaves support
-                # the connector only handles masters with a single slave
-                # should give in args an array for freq and mode for all spi slaves
-
-                # self.slaves = []
-                # for i in range(0, cs_count):
-                #         self.slaves.append(self.spi_master.get_port(cs = i, freq = frequency[i], mode = mode[i]))
 
                 # disconnect device
                 # TODO close spi
@@ -95,8 +107,18 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
 
         def spi_write(self, data):
                 """"""
-                self.spi.write(data)
+                # send dummy data to initialize connection
+                self.log.debug("********** SPI WRITE CONNECTEUR **********")
+                self.log.debug(f"SPI WRITE CONNECTEUR DATA {data}")
+                # TODO spi est un port et non le SpiController !
+                self.spi.exchange(data)
 
         def spi_read(self, read_size):
                 """"""
-                self.data_read = self.spi.read(readlen = read_size)
+                self.log.debug("********** SPI READ CONNECTEUR **********")
+<<<<<<< HEAD
+                self.data_read = self.spi.exchange()
+=======
+                self.data_read = self.spi.exchange(readlen = read_size)
+                self.log.debug(f"********** DATA READ = {self.data_read} **********")
+>>>>>>> 6f98b68 (progress on read)
