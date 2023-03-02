@@ -36,6 +36,13 @@ class Field:
 
 @dataclass
 class RoField(Field):
+    """Read Only Field
+    """
+    
+    def supported(self):
+        """Return True if this field is supported by the attribute
+        """
+        return self.attribute.support(self.name)
     
     def get(self):
         """Attribute is the one holding the data

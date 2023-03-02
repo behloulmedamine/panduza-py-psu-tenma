@@ -33,8 +33,15 @@ class EnsureError(Exception):
 class Attribute:
     name: str
     interface = None
+
+    # True if the attribute must be published on mqtt with retain=True
     retain: bool = True
-    ENSURE_TIMEOUT: ClassVar[float] = 5.0 # seconds
+
+    # Do not wait for attribute update at start (interface may be empty)
+    bypass_init_ensure: bool = False
+
+    # Delay before ensure function raise an error (in seconds)
+    ENSURE_TIMEOUT: ClassVar[float] = 5.0
 
     # ---
 
@@ -76,8 +83,14 @@ class Attribute:
     def ensure_init(self):
         """Ensure that the interface has been initialized by the broker
         """
+        # Check by pass
+        if self.bypass_init_ensure:
+            return
         # Do not need to check if the attribute is not retained
         if not self.retain:
+            return
+        # Do not need to check the misc attribute (all fields are optionnal)
+        if self.name == "misc":
             return
 
         # 
@@ -94,7 +107,7 @@ class Attribute:
             self._update_event.wait(remaining_time)
         
         if time.perf_counter()-start_time >= Attribute.ENSURE_TIMEOUT:
-            raise EnsureError(f"{self._lhead} initial data not recieved for field '{self.name}'")
+            raise EnsureError(f"{self._lhead} initial data not recieved for attribute '{self.name}'")
 
     # ---
     
@@ -135,6 +148,14 @@ class Attribute:
         with self._field_data_lock:
             self._field_names.append(field.name)
         return self
+    
+    # ---
+
+    def support(self, field_name):
+        if field_name in self._field_data:
+            return True
+        else:
+            return False
 
     # ---
 

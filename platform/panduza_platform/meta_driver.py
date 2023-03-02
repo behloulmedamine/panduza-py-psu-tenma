@@ -272,34 +272,42 @@ class MetaDriver(metaclass=abc.ABCMeta):
 
     def _update_attribute(self, attribute, field, value, push=True):
         """Function that update only one attribute field
+
+        return True if the attribute has been updated
+        return False else
         """
         # Create attribute if not exist
         if not ( attribute in self.__drv_atts ):
             self.__drv_atts[attribute] = dict()
         
         # Update only if the value changed
+        # Then push only if requested
         __att = self.__drv_atts[attribute]
         if not (field in __att) or __att[field] != value:
             __att[field] = value
-            # Then push only if requested
             if push:
                 self._push_attribute(attribute)
+            return True
+
+        # Attribute not updated
+        return False
 
     # ---
 
     def _update_attributes_from_dict(self, change_dict, push=True):
-        """
+        """Function that update multiple attribute and field at the same time
         """
         for attribute in change_dict:
+            modification = False
             for field, value in change_dict[attribute].items():
-                self._update_attribute(attribute, field, value, False)
-            if push:
+                modification = self._update_attribute(attribute, field, value, False) or modification
+            if push and modification:
                 self._push_attribute(attribute)
 
     # ---
 
     def _get_field(self, attribute, field):
-        """
+        """To read a specific field value
         """
         return self.__drv_atts[attribute][field]
 
@@ -336,7 +344,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
 
         # Payload
         pdict = dict()
-        pdict[attribute] = self.__drv_atts[attribute]
+        pdict[attribute] = self.__drv_atts.get(attribute, dict())
         payload = json.dumps(pdict)
 
         # Debug purpose
@@ -388,9 +396,13 @@ class MetaDriver(metaclass=abc.ABCMeta):
     def _pzadrv_init_success(self):
         self.__drv_state = "run"
 
+    # ---
+
     def _pzadrv_error_detected(self, err_string):
         self.__drv_state = "err"
         self.__err_string = err_string
+
+    # ---
 
     def _pzadrv_restart(self):
         self.__drv_state = "init"
@@ -403,7 +415,6 @@ class MetaDriver(metaclass=abc.ABCMeta):
     ###########################################################################
     ###########################################################################
 
-    
     @abc.abstractmethod
     def _PZADRV_config(self):
         """

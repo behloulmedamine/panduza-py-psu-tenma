@@ -111,10 +111,10 @@ class DriverQL355P(MetaDriverPsu):
     ###########################################################################
     ###########################################################################
 
-    def _PZADRV_PSU_read_state_value(self):
+    def _PZADRV_PSU_read_enable_value(self):
         return self.state
 
-    def _PZADRV_PSU_write_state_value(self, v):
+    def _PZADRV_PSU_write_enable_value(self, v):
         self.state = v
         cmd = STATE_VALUE_ENUM[v]
         self.__write(f"OP1 {int(cmd)}")
