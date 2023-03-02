@@ -23,6 +23,25 @@ class ConnectorModbusClientSerial(ConnectorModbusClientBase):
     @staticmethod
     def GetV2(**kwargs):
         """Singleton main getter
+
+
+        :Keyword Arguments:
+        * *port_name* (``str``) --
+            serial port name
+    
+        * *vendor* (``str``) --
+            ID_VENDOR_ID
+        * *model* (``str``) --
+            ID_MODEL_ID
+        * *serial_short* (``str``) --
+            ID_SERIAL_SHORT
+        * *base_devname* (``str``) --
+            /dev/ttyACM or USB
+        
+        * *baudrate* (``int``) --
+            serial
+        * *bytesize* (``int``) --
+            serial
         """
 
         # Get the serial port name
@@ -34,7 +53,6 @@ class ConnectorModbusClientSerial(ConnectorModbusClientBase):
             kwargs["port_name"] = port_name
         else:
             raise Exception("no way to identify the modbus serial port")
-
 
         # Create the new connector
         if not (port_name in ConnectorModbusClientSerial.__instances):
@@ -49,6 +67,7 @@ class ConnectorModbusClientSerial(ConnectorModbusClientBase):
         # Return the previously created
         return ConnectorModbusClientSerial.__instances[port_name]
 
+    # ---
 
     @staticmethod
     def Get(usb_vendor_id: str = None, usb_product_id: str = None, usb_serial_id: str = None, usb_base_dev_tty: str ="/dev/ttyACM",
@@ -121,7 +140,7 @@ class ConnectorModbusClientSerial(ConnectorModbusClientBase):
     def write_register(self, address: int, value, unit: int = 1):
         """
         """
-        response = self.client.write_register(address, value, unit=unit)
+        response = self.client.write_register(address, value, slave=unit)
         if response.isError():
             raise Exception(f'Error message: {response}')
 
@@ -131,7 +150,7 @@ class ConnectorModbusClientSerial(ConnectorModbusClientBase):
     def read_input_registers(self, address: int, size: int = 1, unit: int = 1):
         """
         """
-        response = self.client.read_input_registers(address, size, unit=unit)
+        response = self.client.read_input_registers(address, size, slave=unit)
         if not response.isError():
             return response.registers
         else:

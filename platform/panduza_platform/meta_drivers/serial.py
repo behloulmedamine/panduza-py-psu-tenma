@@ -22,19 +22,16 @@ class MetaDriverSerial(MetaDriver):
             },
         }
 
-    def _PZADRV_loop_ini(self, tree):
+    def _PZADRV_loop_init(self, tree):
 
         self.__cmd_handlers = {
             "data": self.__handle_cmds_set_data
         }
 
-        # self._update_attribute("state", "value", self._PZADRV_PSU_read_state_value())
-        # self._update_attribute("volts", "value", self._PZADRV_PSU_read_volts_value())
-
         # default = dict() if "default" not in tree else tree["default"]
         # self._update_attributes_from_dict(default)
 
-        self._pzadrv_ini_success()
+        self._pzadrv_init_success()
 
     def _PZADRV_loop_run(self):
         pass

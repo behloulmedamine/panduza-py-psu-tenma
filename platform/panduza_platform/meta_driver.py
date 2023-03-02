@@ -7,6 +7,9 @@ import traceback
 import threading
 import paho.mqtt.client as mqtt
 from loguru import logger
+import logging
+
+from .log.driver import driver_logger
 
 class MetaDriver(metaclass=abc.ABCMeta):
     """Mother class for all the python meta drivers
@@ -51,10 +54,11 @@ class MetaDriver(metaclass=abc.ABCMeta):
         self._tree = tree
 
         # Store attribute representation
+        # Contains all the attributes and fields of the driver class in dict
         self.__drv_atts = { }
 
         # Current state of the driver
-        self.__drv_state = 'ini'
+        self.__drv_state = 'init'
         self.__drv_state_prev = None
 
         # Time where the state started
@@ -66,7 +70,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
 
         # Init name and logger
         self._name = self._tree["name"]
-        self.log = logger.bind(driver_name=self._name)
+        self.log = driver_logger(self._name)
 
         # Check for name in the driver tree
         if not ("info" in self._PZADRV_config()):
@@ -151,11 +155,11 @@ class MetaDriver(metaclass=abc.ABCMeta):
         """Core of the state machine
         """
         # log
-        self.log.info("Interface started !")
+        self.log.info("Interface started!")
 
         # States
         __states = {
-            'ini': self.__drv_state_ini,
+            'init': self.__drv_state_init,
             'run': self.__drv_state_run,
             'err': self.__drv_state_err
         }
@@ -188,11 +192,11 @@ class MetaDriver(metaclass=abc.ABCMeta):
     ###########################################################################
     ###########################################################################
 
-    async def __drv_state_ini(self):
+    async def __drv_state_init(self):
         """
         """
         try:
-            self._PZADRV_loop_ini(self._tree)
+            self._PZADRV_loop_init(self._tree)
         except Exception as e:
             print(traceback.format_exc())
             self._pzadrv_error_detected(str(e))
@@ -240,7 +244,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
         topic_string = str(msg.topic)
         
         # Debug purpose
-        self.log.debug("NEW MSG > topic={} payload='{}' !", topic_string, msg.payload)
+        self.log.debug(f"MSG_IN < %{topic_string}% {msg.payload}")
 
         # Check if it is a discovery request
         if topic_string == "pza":
@@ -267,28 +271,43 @@ class MetaDriver(metaclass=abc.ABCMeta):
     ###########################################################################
 
     def _update_attribute(self, attribute, field, value, push=True):
-        """Function that update an attribute field
+        """Function that update only one attribute field
+
+        return True if the attribute has been updated
+        return False else
         """
+        # Create attribute if not exist
         if not ( attribute in self.__drv_atts ):
             self.__drv_atts[attribute] = dict()
-        self.__drv_atts[attribute][field] = value
-        # Push if requested
-        if push:
-            self._push_attribute(attribute)
-
-
-    def _update_attributes_from_dict(self, change_dict, push=True):
-        """
-        """
-        for attribute in change_dict:
-            for field, value in change_dict[attribute].items():
-                self._update_attribute(attribute, field, value, False)
+        
+        # Update only if the value changed
+        # Then push only if requested
+        __att = self.__drv_atts[attribute]
+        if not (field in __att) or __att[field] != value:
+            __att[field] = value
             if push:
                 self._push_attribute(attribute)
+            return True
 
+        # Attribute not updated
+        return False
+
+    # ---
+
+    def _update_attributes_from_dict(self, change_dict, push=True):
+        """Function that update multiple attribute and field at the same time
+        """
+        for attribute in change_dict:
+            modification = False
+            for field, value in change_dict[attribute].items():
+                modification = self._update_attribute(attribute, field, value, False) or modification
+            if push and modification:
+                self._push_attribute(attribute)
+
+    # ---
 
     def _get_field(self, attribute, field):
-        """
+        """To read a specific field value
         """
         return self.__drv_atts[attribute][field]
 
@@ -325,11 +344,11 @@ class MetaDriver(metaclass=abc.ABCMeta):
 
         # Payload
         pdict = dict()
-        pdict[attribute] = self.__drv_atts[attribute]
+        pdict[attribute] = self.__drv_atts.get(attribute, dict())
         payload = json.dumps(pdict)
 
         # Debug purpose
-        self.log.debug(f"PUSH > topic={topic} payload='{payload}' retain='{do_retain}'")
+        self.log.debug(f"MSG_OUT > %{topic}% {payload} retain={do_retain}")
 
         # Publish
         request = self.mqtt_client.publish(topic, payload, qos=qos, retain=do_retain)
@@ -374,15 +393,19 @@ class MetaDriver(metaclass=abc.ABCMeta):
     ###########################################################################
     ###########################################################################
 
-    def _pzadrv_ini_success(self):
+    def _pzadrv_init_success(self):
         self.__drv_state = "run"
+
+    # ---
 
     def _pzadrv_error_detected(self, err_string):
         self.__drv_state = "err"
         self.__err_string = err_string
 
+    # ---
+
     def _pzadrv_restart(self):
-        self.__drv_state = "ini"
+        self.__drv_state = "init"
 
     ###########################################################################
     ###########################################################################
@@ -392,7 +415,6 @@ class MetaDriver(metaclass=abc.ABCMeta):
     ###########################################################################
     ###########################################################################
 
-    
     @abc.abstractmethod
     def _PZADRV_config(self):
         """
@@ -410,7 +432,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
         return []
 
     @abc.abstractmethod
-    def _PZADRV_loop_ini(self, tree):
+    def _PZADRV_loop_init(self, tree):
         """
         """
         pass

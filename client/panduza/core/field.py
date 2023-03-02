@@ -36,13 +36,18 @@ class Field:
 
 @dataclass
 class RoField(Field):
+    """Read Only Field
+    """
+    
+    def supported(self):
+        """Return True if this field is supported by the attribute
+        """
+        return self.attribute.support(self.name)
     
     def get(self):
+        """Attribute is the one holding the data
         """
-        """
-        # self.attribute.set(**{self.name: val})
-        pass
-
+        return self.attribute.get(self.name)
 
 # -----------------------------------------------------------------------------
 
@@ -51,8 +56,8 @@ class RwField(RoField):
     """Read Write Field
     """
     
-    def set(self, val):
+    def set(self, val, ensure=True):
         """To write the field
         """
-        self.attribute.set(**{self.name: val})
+        self.attribute.set(**{self.name: val, "ensure": ensure})
 

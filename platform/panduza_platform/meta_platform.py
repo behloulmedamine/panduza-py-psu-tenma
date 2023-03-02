@@ -4,22 +4,19 @@ import pkgutil
 import argparse
 import threading
 import importlib
-from loguru import logger
 from sys import platform
 
 from .conf import PLATFORM_VERSION
 from .broker import Broker
 
 
+from .log.platform import platform_logger
+
 from .inbuilt import PZA_DRIVERS_LIST as INBUILT_DRIVERS
 from .drivers.std import PZA_DRIVERS_LIST as STD_DRIVERS
 from .drivers.fake import PZA_DRIVERS_LIST as FAKE_DRIVERS
 
 
-
-# Default set for logger extra 'driver_name'
-#
-logger.configure(extra={"driver_name":"+++"})
 
 class MetaPlatform:
     """ Main class to manage the platform
@@ -40,10 +37,13 @@ class MetaPlatform:
     def __init__(self):
         """ Constructor
         """
+        # Init the platform logger
+        self._log = platform_logger()
+
         # Debug logs to structure log file
-        logger.info("==========================================")
-        logger.info(f"= PANDUZA PYTHON PLATFORM          {PLATFORM_VERSION} =")
-        logger.info("==========================================")
+        self._log.info("==========================================")
+        self._log.info(f"= PANDUZA PYTHON PLATFORM          {PLATFORM_VERSION} =")
+        self._log.info("==========================================")
 
         # Threads
         self.threads = []
@@ -67,7 +67,7 @@ class MetaPlatform:
         """platform will use the given tree filepath
         """
         self.tree_filepath = tree_filepath
-        logger.debug(f"force tree:{self.tree_filepath}")
+        self._log.debug(f"force tree:{self.tree_filepath}")
         
     ###########################################################################
     ###########################################################################
@@ -83,7 +83,7 @@ class MetaPlatform:
 
         # Check if logs are enabled
         if not args.enable_logs and self.force_log != True:
-            logger.remove()
+            self._log.remove()
 
         # Check tree filepath value
         self.tree_filepath = args.tree
@@ -95,7 +95,7 @@ class MetaPlatform:
         """ Load interfaces declared in the tree for the given broker
         """
         # Debug log
-        logger.info(" + {} ({}:{})", broker_name, broker_tree["addr"], broker_tree["port"])
+        self._log.info(f" + {broker_name} ({broker_tree['addr']}:{broker_tree['port']})")
 
         # Create broker object
         broker = Broker(broker_tree["addr"], broker_tree["port"])
@@ -150,7 +150,7 @@ class MetaPlatform:
             driver_name = "?"
             if "driver" in interface_declaration:
                 driver_name = interface_declaration["driver"]
-            logger.warning("> {} [{}] interface disabled", name, driver_name)
+            self._log.warning(f"> {name} [{driver_name}] interface disabled")
             return
 
         # Multiple interfaces, need to create one interface for each
@@ -182,9 +182,9 @@ class MetaPlatform:
                 "instance":instance
             })
 
-            logger.info("> {} [{}]", name, driver_name)
+            self._log.info(f"> {name} [{driver_name}]")
         except Exception as e:
-            logger.error("{} : {} ({})", driver_name, name, str(e))
+            self._log.error(f"{driver_name} : {name} ({str(e)})")
 
     ###########################################################################
     ###########################################################################
@@ -211,23 +211,23 @@ class MetaPlatform:
         """Function to discover python plugins related to panduza python platform
         """
         #
-        # logger.debug(f"PYPATH: {sys.path}")
+        # self._log.debug(f"PYPATH: {sys.path}")
         # help('modules')
 
         # Discovering process
-        logger.debug("Start plugin discovery")
+        self._log.debug("Start plugin discovery")
         discovered_plugins = {
             name: importlib.import_module(name)
             for finder, name, ispkg
             in pkgutil.iter_modules()
             if name.startswith("panduza_class")
         }
-        logger.debug("Discovered plugins: {}", str(discovered_plugins))
+        self._log.debug(f"Discovered plugins: {str(discovered_plugins)}")
 
         # Import plugin inside the platform manager
         # Each class plugins export a PZA_DRIVERS_LIST with the list of all the managed drivers
         for plugin_name in discovered_plugins :
-            logger.info("Load plugin: '{}'", plugin_name)
+            self._log.info(f"Load plugin: '{plugin_name}'")
             plugin_package = __import__(plugin_name)
             for drv in plugin_package.PZA_DRIVERS_LIST:
                 self.register_driver(drv)
@@ -258,7 +258,7 @@ class MetaPlatform:
     def register_driver(self, driver):
         """
         """
-        logger.info("Register driver: '{}'", driver()._PZADRV_config()["compatible"])
+        self._log.info(f"Register driver: {driver()._PZADRV_config()['compatible']}")
         self.drivers.append(driver)
 
     ###########################################################################
@@ -267,9 +267,9 @@ class MetaPlatform:
     def hunt_mode(self):
         """Fonction to perform the interface auto-detection on the system
         """
-        logger.info("*********************************")
-        logger.info("*** !!! HUNT MODE ENABLED !!! ***")
-        logger.info("*********************************")
+        self._log.info("*********************************")
+        self._log.info("*** !!! HUNT MODE ENABLED !!! ***")
+        self._log.info("*********************************")
 
         os.makedirs("/etc/panduza/platform", exist_ok=True)
         filepath = "/etc/panduza/platform/py.json"
@@ -296,7 +296,7 @@ class MetaPlatform:
         # Check if the hunt mode is enabled
         HUNT = os.getenv('HUNT')
         hunt = os.getenv('hunt')
-        logger.info(f"HUNT={HUNT} & hunt={hunt}")
+        self._log.info(f"HUNT={HUNT} & hunt={hunt}")
         if HUNT == "on" or HUNT=="1" or hunt == "on" or hunt=="1":
             self.hunt_mode()
 
@@ -314,13 +314,15 @@ class MetaPlatform:
                     self.tree = json.load(tree_file)
 
                 # Parse configs
-                logger.debug("load tree:{}", json.dumps(self.tree, indent=1))
+                self._log.debug(f"load tree:{json.dumps(self.tree, indent=1)}")
                 for broker in self.tree["brokers"]:
                     self.__load_tree_broker(self.tree["machine"], broker, self.tree["brokers"][broker])
 
                 # Run all the interfaces on differents threads
+                thread_id=0
                 for interface in self.interfaces:
-                    t = threading.Thread(target=interface["instance"].start)
+                    t = threading.Thread(target=interface["instance"].start, name="T" + str(thread_id))
+                    thread_id+=1
                     self.threads.append(t)
 
                 # Start all the threads
@@ -328,18 +330,18 @@ class MetaPlatform:
                     thread.start()
                 
                 # Log
-                logger.info("Platform started !")
+                self._log.info("Platform started!")
 
                 # Join them all !
                 for thread in self.threads:
                     thread.join()
 
             except KeyboardInterrupt:
-                logger.warning("ctrl+c => user stop requested")
+                self._log.warning("ctrl+c => user stop requested")
                 self.stop()
 
             except FileNotFoundError:
-                logger.critical(f"Platform configuration file 'tree.json' has not been found at location '{self.tree_filepath}' !!==>> STOP PLATFORM")
+                self._log.critical(f"Platform configuration file 'tree.json' has not been found at location '{self.tree_filepath}' !!==>> STOP PLATFORM")
 
     ###########################################################################
     ###########################################################################

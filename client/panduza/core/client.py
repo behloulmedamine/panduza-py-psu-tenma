@@ -136,7 +136,9 @@ class Client:
     def publish(self, topic, payload: bytes, qos=0):
         """Helper to publish raw messages
         """
-        self.log.debug(f"Publish to topic {topic} with QOS={qos}: {payload}")
+        # Debug
+        self.log.debug(f"MSG_OUT %{topic}% {payload} QOS={qos}")
+
         request = self.client.publish(topic, payload, qos=qos, retain=False)
         request.wait_for_publish()
 
