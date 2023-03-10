@@ -95,17 +95,10 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase) :
 
 
         # TODO should add the cs value in these functions
-        def spi_write(self, data):
+        def spi_transfer(self, data):
                 """
                 Write function of the connector
                 Calls the write function of the driver
                 """
-                self.spi.write(data)
+                return self.spi.exchange(data, len(data), duplex=True)
 
-        # TODO should add the cs value in these functions
-        def spi_read(self, read_size):
-                """
-                Read function of the connector
-                Calls the read function of the driver
-                """
-                self.data_read = self.spi.read(readlen = read_size)

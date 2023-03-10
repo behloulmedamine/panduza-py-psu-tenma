@@ -12,15 +12,9 @@ class ConnectorSPIMasterBase(metaclass=abc.ABCMeta) :
         """
 
         @abc.abstractmethod
-        def spi_write(self, data) :
+        def spi_transfer(self, data) :
                 """
                 Write data
                 """
                 pass
 
-        @abc.abstractmethod
-        def spi_read(self) :
-                """
-                Read data
-                """
-                pass

@@ -42,8 +42,7 @@ class DriverFtdiSpi(MetaDriver):
 
 
                 self.__cmd_handlers = {
-                        "write" : self.__handle_cmd_write,
-                        "read" : self.__handle_cmd_read
+                        "transfer" : self.__handle_cmd_transfer
                 }
 
                 self._pzadrv_init_success()
@@ -79,31 +78,18 @@ class DriverFtdiSpi(MetaDriver):
         ###########################################################################
         ###########################################################################
 
-        def __handle_cmd_write(self, cmd_att) :
+        def __handle_cmd_transfer(self, cmd_att) :
                 """
                 Command handler for the write function
                 Called when the user writes in the write attribute
                 """
                 self.log.debug(f"CMD_ATT = {cmd_att}")
-                if "values" in cmd_att:
-                        values = cmd_att["values"]
-                        try:
-                                # TODO give the cs to the spi write
-                                self.spi_connector.spi_write(values)
-                        except Exception as e:
-                                self.log.error(f"{e}")
-
-        def __handle_cmd_read(self, cmd_att) :
-                """
-                Command handler for the write function
-                Called when the user writes in the read attribute
-                """
-                self.log.debug(f"CMD_ATT = {cmd_att}")
-                if "values" in cmd_att:
-                        values = cmd_att["values"]
-                        try:
-                                self.spi_connector.spi_read(values)
-                                self._update_attribute("read", "values", list(self.spi_connector.data_read))
-
-                        except Exception as e:
-                                self.log.error(f"in __handle_cmd_read : {e}")
+                if "tx" in cmd_att:
+                    values = cmd_att["tx"]
+                    try:
+                        # TODO give the cs to the spi write
+                        read_values = self.spi_connector.spi_transfer(values)
+                        self.log.debug("update")
+                        self._update_attribute("transfer", "rx", list(read_values), push=True)
+                    except Exception as e:
+                        self.log.error(f"{e}")
