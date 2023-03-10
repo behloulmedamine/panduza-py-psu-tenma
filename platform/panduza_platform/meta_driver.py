@@ -281,9 +281,9 @@ class MetaDriver(metaclass=abc.ABCMeta):
         __att = self.__drv_atts[attribute]
         if not (field in __att) or __att[field] != value:
             __att[field] = value
-            # Then push only if requested
-            if push:
-                self._push_attribute(attribute)
+        # Then push only if requested
+        if push:
+            self._push_attribute(attribute)
 
     # ---
 
@@ -323,7 +323,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
     ###########################################################################
     ###########################################################################
 
-    def _push_attribute(self, attribute, qos = 0, retain = True):
+    def _push_attribute(self, attribute, qos = 0, retain = False):
         """Publish the attribute
         """
         # Check for retain
