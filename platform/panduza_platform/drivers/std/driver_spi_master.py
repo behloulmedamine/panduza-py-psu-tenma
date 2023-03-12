@@ -1,10 +1,17 @@
 from ...meta_driver import MetaDriver
 from ...connectors.spi_master_ftdi import ConnectorSPIMasterFTDI
+from ...connectors.spi_master_aardvark import ConnectorSPIMasterAardvark
+from panduza_platform.connectors.udev_tty import HuntUsbDevs
 
-class DriverFtdiSpi(MetaDriver):
+class DriverSpiMaster(MetaDriver):
         """
-        Driver for FTDI-SPI chip
+        Driver for drive SPI master
         """
+        
+        backend_dict = {
+            "ftdi": ConnectorSPIMasterFTDI,
+            "aardvark": ConnectorSPIMasterAardvark
+        }
 
         ###########################################################################
         ###########################################################################
@@ -12,15 +19,15 @@ class DriverFtdiSpi(MetaDriver):
         # must match with tree.json content
         def _PZADRV_config(self):
                 return {
-                        "name": "FtdiSpi",
-                        "description": "Generic Ftdi Spi interface",
+                        "name": "GenericSPIMaster",
+                        "description": "Generic Spi master interface",
                         "info": {
-                                "type": "ftdi_spi",
+                                "type": "spi_master",
                                 "version": "0.1"
                         },
                         "compatible": [
-                                "ftdi_spi",
-                                "py_ftdi_spi"
+                                "spi_master",
+                                "py.spi_master"
                         ]
                 }
 
@@ -31,14 +38,24 @@ class DriverFtdiSpi(MetaDriver):
                 # self.log.debug(f"{tree}")
                 settings = tree["settings"]
 
+                backend = settings.get('backend')
+                
+                if backend is not None:
+                    self.log.info(f'using backend: {backend}')
+                    connector = self.backend_dict.get(backend)
+                else:
+                    self.log.warning("Backend auto detection is unreliable ! Try to specify the backend for the moment")
+                    #try to detect backend
+                    if settings.get('unique_id') is not None or settings.get('usb_product_id') == 'e0d0':
+                        backend = 'aardvark'
+                    else:
+                        backend = 'ftdi'
+                    connector = self.backend_dict.get(backend)
+                    self.log.warning(f'Auto-detect: assuming backend {backend}')
+                    
 
                 # Get the gate
-                self.spi_connector = ConnectorSPIMasterFTDI.Get(
-                        usb_serial_id=settings["usb_serial_id"],
-                        port=settings["port"],
-                        polarity=settings["polarity"],
-                        phase=settings["phase"]
-                )
+                self.spi_connector = connector.Get(**settings)
 
 
                 self.__cmd_handlers = {
@@ -47,6 +64,34 @@ class DriverFtdiSpi(MetaDriver):
 
                 self._pzadrv_init_success()
 
+        ###########################################################################
+        ###########################################################################
+        
+        def _PZADRV_hunt_instances(self):
+            instances = []
+
+            # 0403:6001 Future Technology Devices International, Ltd FT232 Serial (UART) IC
+            # 0403:e0d0 Future Technology Devices International, Ltd Total Phase Aardvark I2C/SPI Host Adapter
+            # note: also detect aardvark probe
+            FTDI_UART_VENDOR="0403"
+            usb_pieces = HuntUsbDevs(vendor=FTDI_UART_VENDOR, subsystem="usb")
+            for p in usb_pieces:
+                iss = p.get("ID_SERIAL_SHORT")
+                instances.append(DriverSpiMaster.__tgen(FTDI_UART_VENDOR, p.get("ID_MODEL_ID", "DEVICE ID NOT AVAILABLE"), iss, iss))
+
+            return instances
+    
+        def __tgen(vendor, model, serial_short, name_suffix):
+            return {
+                "name": "spi:" + name_suffix,
+                "driver": "py.spi_master",
+                "settings": {
+                    "vendor": vendor,
+                    "model": model,
+                    "serial_short": serial_short
+                }
+            }
+        
         ###########################################################################
         ###########################################################################
 

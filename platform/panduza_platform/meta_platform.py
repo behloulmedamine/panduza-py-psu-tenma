@@ -34,11 +34,12 @@ class MetaPlatform:
     ###########################################################################
     ###########################################################################
 
-    def __init__(self):
+    def __init__(self, run_dir="/etc"):
         """ Constructor
         """
         # Init the platform logger
         self._log = platform_logger()
+        self.run_dir = run_dir
 
         # Debug logs to structure log file
         self._log.info("==========================================")
@@ -271,8 +272,8 @@ class MetaPlatform:
         self._log.info("*** !!! HUNT MODE ENABLED !!! ***")
         self._log.info("*********************************")
 
-        os.makedirs("/etc/panduza/platform", exist_ok=True)
-        filepath = "/etc/panduza/platform/py.json"
+        os.makedirs(f"{self.run_dir}/panduza/platform", exist_ok=True)
+        filepath = f"{self.run_dir}/panduza/platform/py.json"
 
         f = open(filepath, "w")
 
@@ -305,7 +306,7 @@ class MetaPlatform:
             if not self.tree_filepath:
                 # Set the default tree path on linux
                 if platform == "linux" or platform == "linux2":
-                    self.tree_filepath = "/etc/panduza/tree.json"
+                    self.tree_filepath = f"{self.run_dir}/panduza/tree.json"
 
             try:
                 # Load tree

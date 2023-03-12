@@ -97,11 +97,11 @@ def HuntUsbDevs(vendor, model=None, subsystem=None):
     for device in udev_context.list_devices():
         properties = dict(device.properties)
 
-        if not ( vendor and ("ID_VENDOR_ID" in properties) and (properties["ID_VENDOR_ID"]==vendor) ):
+        if vendor is not None and properties.get("ID_VENDOR_ID") != vendor:
             continue
-        if not ( model and ("ID_MODEL_ID" in properties) and (properties["ID_MODEL_ID"]==model) ):
+        if model is not None and properties.get("ID_MODEL_ID") != model :
             continue
-        if not ( subsystem and ("SUBSYSTEM" in properties) and (properties["SUBSYSTEM"]==subsystem) ):
+        if subsystem is not None and properties.get("SUBSYSTEM") != subsystem:
             continue
 
         results.append(properties)
