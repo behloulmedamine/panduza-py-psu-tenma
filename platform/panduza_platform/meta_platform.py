@@ -15,7 +15,8 @@ from .log.platform import platform_logger
 from .inbuilt import PZA_DRIVERS_LIST as INBUILT_DRIVERS
 from .drivers.std import PZA_DRIVERS_LIST as STD_DRIVERS
 from .drivers.fake import PZA_DRIVERS_LIST as FAKE_DRIVERS
-
+from .drivers.ftdi import PZA_DRIVERS_LIST as FTDI_DRIVERS
+from .drivers.aardvark import PZA_DRIVERS_LIST as AARDVARK_DRIVERS
 
 
 class MetaPlatform:
@@ -239,6 +240,10 @@ class MetaPlatform:
         for drv in FAKE_DRIVERS:
             self.register_driver(drv)
         for drv in INBUILT_DRIVERS:
+            self.register_driver(drv)
+        for drv in FTDI_DRIVERS:
+            self.register_driver(drv)
+        for drv in AARDVARK_DRIVERS:
             self.register_driver(drv)
             
 
