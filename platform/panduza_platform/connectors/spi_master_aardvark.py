@@ -17,15 +17,17 @@ class ConnectorSPIMasterAardvark(ConnectorSPIMasterBase):
     @staticmethod
     def aardvark_find_unique_id():
         n, devices = aardvark_py.aa_find_devices(10)
+        id_list = {}
         for device in range(n):
-            if devices[device] & aardvark_py.AA_PORT_NOT_FREE:
+            if (devices[device] & aardvark_py.AA_PORT_NOT_FREE):
                 devices[device] = None
                 continue
 
-            with aardvark_py.aa_open(devices[device]) as handle:
-                devices[device] = aardvark_py.aa_unique_id(handle)
+            handle = aardvark_py.aa_open(devices[device])
+            id_list.update({device: aardvark_py.aa_unique_id(handle)})
+            aardvark_py.aa_close(handle)
 
-        return devices
+        return id_list
 
     # WARNING : bitorder argument is not used
     # It seems unsuported by pyftdi
@@ -44,10 +46,10 @@ class ConnectorSPIMasterAardvark(ConnectorSPIMasterBase):
         bitorder = kwargs.get("bitorder", 0)
 
         candidates = ConnectorSPIMasterAardvark.aardvark_find_unique_id()
-
+        
         if unique_id is not None:
             instance_name = unique_id
-            port = candidates.index(unique_id)
+            port = list(candidates.keys())[list(candidates.values()).index(int(unique_id))]
         elif len(candidates) == 1:
             instance_name = candidates[0]
             port = 0
@@ -95,12 +97,13 @@ class ConnectorSPIMasterAardvark(ConnectorSPIMasterBase):
                 "You need to pass through Get method to create an instance")
         else:
             self.log = logger.bind(driver_name=key)
-            self.log.info(f"attached to the FTDI SPI Serial Connector")
+            self.log.info(f"attached to the Aardvark SPI Serial Connector")
 
         # creates the spi master
         self.spi = aardvark_py.aa_open(port)
-        aardvark_py.aa_spi_bitrate(self.spi, bitrate_khz)
         aardvark_py.aa_spi_configure(self.spi, polarity, phase, bitorder)
+        aardvark_py.aa_spi_bitrate(self.spi, bitrate_khz)
+        
 
         # TODO add multiple slaves support
         # the connector only handles masters with a single slave
@@ -121,4 +124,14 @@ class ConnectorSPIMasterAardvark(ConnectorSPIMasterBase):
         Write function of the connector
         Calls the write function of the driver
         """
-        return self.spi.aa_spi_write(data, len(data), duplex=True)
+        from array import array
+        rx = aardvark_py.array_u08(len(data))
+        tx = array('B', data)
+        
+        status, rx = aardvark_py.aa_spi_write(self.spi, tx, rx)
+        if status < 0:
+            self.log.error("aardvark error")
+        return list(rx)
+
+    def hunt():
+        raise Exception("NOT IMPLEMENTED")

@@ -137,3 +137,6 @@ class ConnectorSPIMasterFTDI(ConnectorSPIMasterBase):
         Calls the write function of the driver
         """
         return self.spi.exchange(data, len(data), duplex=True)
+
+    def hunt():
+        raise Exception("NOT IMPLEMENTED")

@@ -9,12 +9,10 @@
                     "name": "spi",
                     "driver": "spi_master",
                     "settings": {
-                        "backend": "ftdi",
-                        "usb_serial_id": "232h",
-                        "port": "1",
+                        "unique_id": 2237170206,
                         "cs": 0,
-                        "polarity": "0",
-                        "phase": "0"
+                        "polarity": 0,
+                        "phase": 0
                     }
                 }
             ]
