@@ -7,7 +7,6 @@ from ..core import Interface, Attribute, EnsureError, RoField, RwField
 class Psu(Interface):
     """Interface to manage power supplies
     """
-    
 
     interface:Interface = None
     
@@ -25,35 +24,61 @@ class Psu(Interface):
 
         super().__post_init__()
 
-        # === STATE ===
+        # === ENABLE ===
         self.add_attribute(
-            Attribute(
-                name = "state"
-            )
+            Attribute( name = "enable" )
         ).add_field(
-            RwField(
-                name = "value"
-            )
+            RwField( name = "value" )
         )
+        
         # === VOLTS ===
         self.add_attribute(
-            Attribute(
-                name = "volts"
-            )
+            Attribute( name = "volts" )
         ).add_field(
-            RwField(
-                name = "goal"
-            )
+            RoField( name = "real" )
+        ).add_field(
+            RwField( name = "goal" )
+        ).add_field(
+            RoField( name = "min" )
+        ).add_field(
+            RoField( name = "max" )
+        ).add_field(
+            RoField( name = "decimals" )
+        ).add_field(
+            RwField( name = "polling_cycle" )
         )
-        # === VOLTS ===
+
+        # === AMPS ===
         self.add_attribute(
-            Attribute(
-                name = "amps"
-            )
+            Attribute( name = "amps" )
         ).add_field(
-            RwField(
-                name = "goal"
-            )
+            RoField( name = "real" )
+        ).add_field(
+            RwField( name = "goal" )
+        ).add_field(
+            RoField( name = "min" )
+        ).add_field(
+            RoField( name = "max" )
+        ).add_field(
+            RoField( name = "decimals" )
+        ).add_field(
+            RwField( name = "polling_cycle" )
+        )
+
+        # === SETTINGS ===
+        self.add_attribute(
+            Attribute( name = "settings", bypass_init_ensure = True )
+        ).add_field(
+            RwField( name = "ovp" )
+        ).add_field(
+            RwField( name = "ocp" )
+        ).add_field(
+            RwField( name = "silent" )
+        )
+
+        # === MISC ===
+        self.add_attribute(
+            Attribute( name = "misc", bypass_init_ensure = True  )
         )
 
         if self.ensure:
