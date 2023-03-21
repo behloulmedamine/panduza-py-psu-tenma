@@ -270,7 +270,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
     ###########################################################################
     ###########################################################################
 
-    def _update_attribute(self, attribute, field, value, push=True):
+    def _update_attribute(self, attribute, field, value, push='always'):
         """Function that update only one attribute field
 
         return True if the attribute has been updated
@@ -285,12 +285,16 @@ class MetaDriver(metaclass=abc.ABCMeta):
         __att = self.__drv_atts[attribute]
         if not (field in __att) or __att[field] != value:
             __att[field] = value
-            if push:
+            # Then push only if requested
+            if push is 'on-change':
                 self._push_attribute(attribute)
             return True
 
         # Attribute not updated
         return False
+
+        if push is 'always':
+            self._push_attribute(attribute)
 
     # ---
 
@@ -331,7 +335,7 @@ class MetaDriver(metaclass=abc.ABCMeta):
     ###########################################################################
     ###########################################################################
 
-    def _push_attribute(self, attribute, qos = 0, retain = True):
+    def _push_attribute(self, attribute, qos = 0, retain = False):
         """Publish the attribute
         """
         # Check for retain

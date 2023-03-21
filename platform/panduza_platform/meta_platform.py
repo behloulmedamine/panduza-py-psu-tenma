@@ -15,7 +15,8 @@ from .log.platform import platform_logger
 from .inbuilt import PZA_DRIVERS_LIST as INBUILT_DRIVERS
 from .drivers.std import PZA_DRIVERS_LIST as STD_DRIVERS
 from .drivers.fake import PZA_DRIVERS_LIST as FAKE_DRIVERS
-
+from .drivers.ftdi import PZA_DRIVERS_LIST as FTDI_DRIVERS
+from .drivers.aardvark import PZA_DRIVERS_LIST as AARDVARK_DRIVERS
 
 
 class MetaPlatform:
@@ -34,11 +35,12 @@ class MetaPlatform:
     ###########################################################################
     ###########################################################################
 
-    def __init__(self):
+    def __init__(self, run_dir="/etc"):
         """ Constructor
         """
         # Init the platform logger
         self._log = platform_logger()
+        self.run_dir = run_dir
 
         # Debug logs to structure log file
         self._log.info("==========================================")
@@ -239,6 +241,10 @@ class MetaPlatform:
             self.register_driver(drv)
         for drv in INBUILT_DRIVERS:
             self.register_driver(drv)
+        for drv in FTDI_DRIVERS:
+            self.register_driver(drv)
+        for drv in AARDVARK_DRIVERS:
+            self.register_driver(drv)
             
 
     ###########################################################################
@@ -271,8 +277,8 @@ class MetaPlatform:
         self._log.info("*** !!! HUNT MODE ENABLED !!! ***")
         self._log.info("*********************************")
 
-        os.makedirs("/etc/panduza/platform", exist_ok=True)
-        filepath = "/etc/panduza/platform/py.json"
+        os.makedirs(f"{self.run_dir}/panduza/platform", exist_ok=True)
+        filepath = f"{self.run_dir}/panduza/platform/py.json"
 
         f = open(filepath, "w")
 
@@ -305,7 +311,7 @@ class MetaPlatform:
             if not self.tree_filepath:
                 # Set the default tree path on linux
                 if platform == "linux" or platform == "linux2":
-                    self.tree_filepath = "/etc/panduza/tree.json"
+                    self.tree_filepath = f"{self.run_dir}/panduza/tree.json"
 
             try:
                 # Load tree

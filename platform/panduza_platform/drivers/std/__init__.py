@@ -5,5 +5,5 @@ from .driver_serial import DriverSerial
 PZA_DRIVERS_LIST=[
     DriverPlatform,
     DriverModbusClient,
-    DriverSerial
+    DriverSerial,
 ]

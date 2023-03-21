@@ -7,3 +7,4 @@ from .interfaces import Io
 from .interfaces import Psu
 from .interfaces import Serial
 from .interfaces import ModbusClient
+from .interfaces import Ftdi_Spi

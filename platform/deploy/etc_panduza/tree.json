@@ -1,13 +1,21 @@
 {
-    "machine": "rename this machine",
+    "machine": "rename_this_machine",
     "brokers": {
         "test_broker": {
             "addr": "localhost",
             "port": 1883,
             "interfaces": [
                 {
-                    "name": "test io",
-                    "driver": "py.io_fake"
+                    "name": "test_ftdi_spi",
+                    "driver": "ftdi_spi",
+                    "settings":
+                    {
+                        "usb_serial_id": "FT8CEM8A",
+                        "port": "/1",
+                        "polarity": 0,
+                        "phase": 0,
+                        "bitorder" : 0
+                    }
                 }
             ]
         }
