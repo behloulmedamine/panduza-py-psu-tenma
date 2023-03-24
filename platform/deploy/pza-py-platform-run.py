@@ -1,11 +1,12 @@
 import sys
+import pathlib
 import argparse
-from loguru import logger
 from panduza_platform import MetaPlatform
 
 import logging
 
-
+# Initialize log file
+pathlib.Path("/etc/panduza/log").mkdir(parents=True, exist_ok=True)
 logging.basicConfig(filename="/etc/panduza/log/py.log", 
 					format='%(asctime)s | %(name)s | %(message)s', 
 					filemode='w') 
@@ -22,4 +23,4 @@ srv.register_driver_plugin_discovery()
 if args.tree != None:
     srv.load_tree_overide(args.tree)
 srv.run()
-logger.warning("Platform stopped !")
+logging.warning("Platform stopped !")
