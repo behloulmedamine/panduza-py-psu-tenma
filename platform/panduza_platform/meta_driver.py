@@ -236,9 +236,9 @@ class MetaDriver(metaclass=abc.ABCMeta):
         """Callback to manage incomming mqtt messages
         
         Args:
-            client: from paho.mqtt.client
-            userdata: from paho.mqtt.client
-            msg: from paho.mqtt.client
+            - client: from paho.mqtt.client
+            - userdata: from paho.mqtt.client
+            - msg: from paho.mqtt.client
         """
         # Get the topix string
         topic_string = str(msg.topic)
@@ -270,31 +270,38 @@ class MetaDriver(metaclass=abc.ABCMeta):
     ###########################################################################
     ###########################################################################
 
-    def _update_attribute(self, attribute, field, value, push='always'):
+    def _update_attribute(self, attribute, field, value, push='on-change'):
         """Function that update only one attribute field
 
-        return True if the attribute has been updated
-        return False else
+        Args
+            - push:
+                - 'on-change' [default]: To push only when value of the attribute changed
+                - 'always': To always push, even if the value did not change
+
+        Returns
+            - True: if the attribute has been updated (means that the internal
+                object, holding the attribute, has been updated)
+            - False: else
         """
         # Create attribute if not exist
         if not ( attribute in self.__drv_atts ):
             self.__drv_atts[attribute] = dict()
-        
+
         # Update only if the value changed
         # Then push only if requested
         __att = self.__drv_atts[attribute]
         if not (field in __att) or __att[field] != value:
             __att[field] = value
-            # Then push only if requested
             if push is 'on-change':
                 self._push_attribute(attribute)
             return True
 
-        # Attribute not updated
-        return False
-
+        # Push anyway if the 'push' flag is set to 'always'
         if push is 'always':
             self._push_attribute(attribute)
+
+        # Attribute not updated
+        return False
 
     # ---
 
