@@ -10,9 +10,8 @@ jobs:
         uses: actions/checkout@v2
 
       # ---
-      - run: echo "${GITHUB_WORKSPACE}"
       - name: Debug
-        run: echo "`ls -la ${GITHUB_WORKSPACE}`"
+        run: ls -la .
 
       # ---
       - run: apt-get update
@@ -20,24 +19,24 @@ jobs:
       - run: apt-get install -y python3 python3-pip
 
       # ---
-      - run: pip install ${GITHUB_WORKSPACE}/client
-      # - run: pip install ${GITHUB_WORKSPACE}/platform
+      - run: pip install -r ./tests/requirements.txt
+      - run: pip install -r ./platform/requirements.txt
+      - run: pip install ./client/
+      - run: pip install ./platform/
 
       # ---
       - run: mosquitto -d
 
       # ---
-      # - run: python3 ${GITHUB_WORKSPACE}/platform/deploy/pza-py-platform-run.py
+      - run: python3 ./platform/deploy/pza-py-platform-run.py ./tests/pza/tree.json &
 
-
-      # - name: Execute tests
-      #   run: coverage run --source='panduza' -m behave
+      # ---
+      - name: Execute tests
+        working-directory: tests
+        run: robot robot/*
       #   env:
       #     PYTHONPATH: "."
       #     COVERAGE_PROCESS_START: "NO"
-
-
-      # - run: echo "`ls -la ${GITHUB_WORKSPACE}`"
 
 
       # - name: Covergae Report
