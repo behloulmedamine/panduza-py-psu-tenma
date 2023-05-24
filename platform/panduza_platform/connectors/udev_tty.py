@@ -1,4 +1,5 @@
 import pyudev
+import logging
 
 def TTYPortFromUsbInfo(vendor_id:str , product_id:str , serial=None, base_devname="/dev/ttyACM"):
     """Find tty port from usb information
@@ -52,8 +53,8 @@ def SerialPortFromUsbSetting(**kwargs):
     # Get parameters
     vendor          = None if "vendor" not in kwargs else kwargs["vendor"]
     model           = None if "model" not in kwargs else kwargs["model"]
-    serial_short    = None if "serial_short" not in kwargs else kwargs["serial_short"]
-    base_devname    = "/dev/ttyACM" if "base_devname" not in kwargs else kwargs["base_devname"]
+    base_devname    = None if "base_devname" not in kwargs else kwargs["base_devname"]
+    usb_id          = None if "usb_serial_id" not in kwargs else kwargs["usb_serial_id"]
 
     # Explore usb device with tty subsystem
     udev_context = pyudev.Context()
@@ -63,22 +64,25 @@ def SerialPortFromUsbSetting(**kwargs):
         # For debugging purpose
         # logger.debug(f"{properties}")
 
-        # Need to find the one with the DEVNAME corresponding to the /dev serial port
-        if 'DEVNAME' not in properties or not properties['DEVNAME'].startswith(base_devname):
+        if 'ID_VENDOR_ID' not in properties or not properties['ID_VENDOR_ID'].startswith(vendor):
             continue
 
         # Checks
+        # if serial_short and (serial_short != properties["ID_SERIAL_SHORT"]):
+        #     continue
         if vendor and (vendor != properties["ID_VENDOR_ID"]):
             continue
         if model and (model != properties["ID_MODEL_ID"]):
             continue
-        if serial_short and (serial_short != properties["ID_SERIAL_SHORT"]):
+        if usb_id and (usb_id != properties["ID_SERIAL_SHORT"]):
+            continue
+        if base_devname and (base_devname != properties["DEVNAME"]):
             continue
 
         return properties["DEVNAME"]
 
-
-    raise Exception(f"ERROR: device tty for [{vendor}:{model}:{serial_short}:{base_devname}] not found !")
+    
+    raise Exception(f"ERROR: device tty for [{vendor}:{model}:{usb_id}:{base_devname}] not found !")
 
 
 
