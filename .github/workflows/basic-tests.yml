@@ -32,12 +32,20 @@ jobs:
       - run: mosquitto -d
 
       # ---
-      - run: python3 ./platform/deploy/pza-py-platform-run.py ./tests/pza/tree.json &
+      - name: Start the platform
+        run: >
+          python3 ./platform/deploy/pza-py-platform-run.py ./tests/pza_platform/tree.json &
+          sleep 1
+
+      - name: Export test env variables
+        uses: cardinalby/export-env-action@v1
+        with:
+          envFile: './tests/envs/fake_bench.env'
 
       # ---
       - name: Execute tests
         working-directory: tests
-        run: robot robot/*
+        run: robot virtual_tests/*
 
       # ---
       - name: Debug
@@ -49,13 +57,6 @@ jobs:
         with:
           name: tests-report
           path: tests/
-
-      # ---
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: hunt-results
-          path: /etc/panduza/platform
 
       # ---
       - run: echo "🎉 Basic Tests finished !"

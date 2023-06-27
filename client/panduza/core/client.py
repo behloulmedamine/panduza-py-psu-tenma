@@ -13,6 +13,7 @@ import threading
 import traceback
 
 import json
+import queue
 import paho.mqtt.client as mqtt
 
 from .core import Core
@@ -52,8 +53,8 @@ class Client:
             self.url, self.port = Core.BrokerInfoFromInterfaceAlias(
                 interface_alias)
         else:
-            self.url = url
-            self.port = port
+            self.url = str(url)
+            self.port = int(port)
 
         # Set flags
         self.is_connected = False
@@ -248,26 +249,38 @@ class Client:
     ###########################################################################
 
     def __store_scan_result(self, topic, payload):
+        """Callback to store scan results piece by piece
         """
-        """
-        self.__scan_mutex.acquire()
+        # lock
+        with self.__scan_mutex:
 
-        if topic == None:
-            return
+            # Check if topic is valid
+            if topic == None:
+                return
 
-        base_topic = topic[:-len("/atts/info")]
-        info = json.loads(payload.decode("utf-8"))
+            # Extract the base topic
+            base_topic = topic[:-len("/atts/info")]
 
-        if info["info"]["type"] == "platform":
-            self.__scan_count_platform += info["info"]["interfaces"]
-            self.__scan_count_interfaces += 1
-        else:
-            self.__scan_count_interfaces += 1
+            # Check for duplicate
+            if base_topic in self.__scan_results:
+                return
 
-        if base_topic not in self.__scan_results and fnmatch(info["info"]["type"], self.__scan_type_filter):
-            self.__scan_results[base_topic] = info["info"]
+            # Process the payload
+            info = json.loads(payload.decode("utf-8"))
+            if info["info"]["type"] == "platform":
+                self.__scan_count_platform += info["info"]["interfaces"]
+                self.__scan_count_interfaces += 1
+            else:
+                self.__scan_count_interfaces += 1
 
-        self.__scan_mutex.release()
+            # Push debug logs
+            self.__scan_messages_logs.put(info)
+
+            # Store result
+            if base_topic not in self.__scan_results and fnmatch(info["info"]["type"], self.__scan_type_filter):
+                self.__scan_results[base_topic] = info["info"]
+
+    # ---
 
     def scan_interfaces(self, type_filter="*"):
         """Scan broker panduza interfaces and return them
@@ -276,7 +289,7 @@ class Client:
         special interface with type *platform*. In the *info* topic of this
         interface there is a special *interfaces* field, it contains the number
         of interface managed by the platfrom. 
-        
+
         So when you start a scan with * in pza, you create 2 counters
         - one that is incremented (+1) for each interface that respond
         - one that is incremented (+info/interfaces) when an interface *platform* respond
@@ -286,26 +299,42 @@ class Client:
         # Init
         self.__scan_mutex = threading.Lock()
         self.__scan_results = {}
+        self.__scan_messages_logs = queue.Queue()
         self.__scan_count_platform = 0
         self.__scan_count_interfaces = 0
         self.__scan_type_filter = type_filter
+
+        # Debug log
+        self.log.info("Start Interface Scanning...")
 
         # Subscribe to interfaces info responses
         self.subscribe("pza/+/+/+/atts/info", self.__store_scan_result)
 
         # Send the global discovery request and wait for answers
         self.publish("pza", u"*", qos=0)
-        
 
+        # Scanning wait with a 5 secondes timeout
+        start_scan_time = time.perf_counter()
         continue_scan = True
-        while continue_scan:
+        while continue_scan and (time.perf_counter() - start_scan_time < 5):
             time.sleep(0.25)
-            self.__scan_mutex.acquire()
-            continue_scan = (self.__scan_count_platform == 0) or (self.__scan_count_platform != self.__scan_count_interfaces)
-            self.__scan_mutex.release()
+            with self.__scan_mutex:
+                continue_scan = (self.__scan_count_platform == 0) or (self.__scan_count_platform != self.__scan_count_interfaces)
 
+        # Debug logs from the mqtt client thread
+        while not self.__scan_messages_logs.empty():
+            msg = self.__scan_messages_logs.get()
+            self.log.info(msg)
 
         # cleanup and return
         self.unsubscribe("pza/+/+/+/atts/info")
+
+        # Trigger error when timeout
+        if time.perf_counter() - start_scan_time >= 5:
+            raise Exception(f"Scan timeout found={self.__scan_count_interfaces}/expected={self.__scan_count_platform}\n\nreceived {self.__scan_results}")
+
+        # 
+        self.log.info(f"Scan ok found={self.__scan_count_interfaces}/expected={self.__scan_count_platform}")
+
         return self.__scan_results
 

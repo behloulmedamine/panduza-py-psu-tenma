@@ -58,20 +58,27 @@ class DriverFormatter(logging.Formatter):
         hmsg = record.message
         hmsg = re_highlighter(hmsg, re_patterns, debug)
         hmsg = highlighter(hmsg, patterns, debug)
-        
-        output = ""
-        # output += record.threadName + "."
+
+        t_name = "Main"
+        if record.threadName != "MainThread":
+            t_name = record.threadName
+
+        output = "" + Style.RESET_ALL
+        output += t_name.ljust(5, ' ')
+        output += "| "
         output += level_highlighter(record.levelname.ljust(8, ' '), level_patterns)
         output += "| "
-        output += Style.BRIGHT + self.back + record.name + Style.RESET_ALL + "."
+        output += Style.BRIGHT + self.back + record.name + Style.RESET_ALL + " "
         output += debug + hmsg
 
         return output
 
 
-
+# =============================================================================
 
 def driver_logger(driver_name):
+    """Logger for platform drivers
+    """
 
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)

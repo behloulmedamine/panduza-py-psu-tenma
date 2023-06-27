@@ -1,0 +1,22 @@
+{
+    "devices": [
+        {
+            "model": "Panduza.FakePsu",
+            "settings": {
+                "number_of_channel": 2
+            }
+        },
+        {
+            "model": "Panduza.FakeDioController",
+            "settings": {
+                "number_of_dio": 2
+            }
+        },
+        {
+            "model": "Panduza.FakeRelayController",
+            "settings": {
+                "number_of_dio": 1
+            }
+        }
+    ]
+}

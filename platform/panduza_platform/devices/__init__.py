@@ -1,0 +1,6 @@
+from .hanmatek import PZA_DEVICES_LIST as HANMATEK_DEVICES
+from .panduza import PZA_DEVICES_LIST as PANDUZA_DEVICES
+
+PZA_DEVICES_LIST = [] \
+    + HANMATEK_DEVICES \
+    + PANDUZA_DEVICES

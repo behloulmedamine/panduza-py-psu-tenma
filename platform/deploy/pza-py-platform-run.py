@@ -1,7 +1,7 @@
 import sys
 import pathlib
 import argparse
-from panduza_platform import MetaPlatform
+from panduza_platform import Platform
 
 import logging
 
@@ -17,9 +17,7 @@ parser.add_argument('tree', nargs='?', default=None)
 args = parser.parse_args()
 
 
-srv = MetaPlatform()
-srv.force_log = True
-srv.register_driver_plugin_discovery()
+srv = Platform()
 if args.tree != None:
     srv.load_tree_overide(args.tree)
 srv.run()

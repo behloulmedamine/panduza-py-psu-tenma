@@ -1,8 +1,14 @@
 import time
 from ..core.core import Core
+from ..core.client import Client
 from ..core.interface import Interface
 
+from .dio import Dio
 from .psu import Psu
+from .ammeter import Ammeter
+
+from .relay import Relay
+from .voltmeter import Voltmeter
 from ..core.log import create_logger
 
 def GenerateAllInterfacesFromAliases(connections):
@@ -12,11 +18,19 @@ def GenerateAllInterfacesFromAliases(connections):
 
     # 
     type_gen = {
-        "psu": Psu
+        "dio": Dio,
+        "psu": Psu,
+        "ammeter": Ammeter,
+        "relay": Relay,
+        "voltmeter": Voltmeter
     }
 
     # Load aliases
     Core.LoadAliases(connections=connections)
+
+    # Client()
+    # broker_alias
+    # scan des interfaces pour vérifier
 
     # Load untyped interfaces first
     interfaces = {}
@@ -30,14 +44,16 @@ def GenerateAllInterfacesFromAliases(connections):
     # Generate interfaces in the correct type
     typed_interfaces = {}
     for name in interfaces:
+        __log.info(f"Try to generate interface '{name}'...")
         itf = interfaces[name]
         t = itf.info.get_type()
-        __log.info(f"Generate interface '{name}' with type '{t}' !")
+        __log.info(f"...type found: '{t}' !")
         assert t != "unknown", f"Error > {name} interface does not respond"
+        assert t in type_gen, f"Unmanaged interface type {t} by panduza robotF plugin for {name}"
         typed_interfaces[name] = type_gen[t](interface=itf)
         # typed_interfaces[name] = Psu(interface=itf)
 
-        
+
     return typed_interfaces
 
 

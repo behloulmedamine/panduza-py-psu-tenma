@@ -130,4 +130,70 @@ class KeywordsPsu(object):
         pza = BuiltIn().get_variable_value("${__pza__}")
         return pza[psu_alias].misc.get(misc_field)
 
+    ###########################################################################
+    # FULL STANDART TESTS
+    ###########################################################################
+
+    @keyword
+    def interface_psu_basic_controls(self, psu_alias):
+        """Just test basic commands of a Power SUpply interface
+
+        Warning this test 
+        """
+        # Test voltage goal
+        BuiltIn().run_keyword("Set Power Supply Voltage Goal", psu_alias, 10)
+        BuiltIn().run_keyword("Set Power Supply Voltage Goal", psu_alias, 3.3)
+
+        # Test current limit
+        BuiltIn().run_keyword("Set Power Supply Current Goal", psu_alias, 2)
+        BuiltIn().run_keyword("Set Power Supply Current Goal", psu_alias, 0.1)
+
+        # Try to turn on and off
+        BuiltIn().run_keyword("Turn On Power Supply", psu_alias)
+        BuiltIn().run_keyword("Power Supply Should Be", psu_alias, "on")
+        BuiltIn().run_keyword("Turn Off Power Supply", psu_alias)
+        BuiltIn().run_keyword("Power Supply Should Be", psu_alias, "off")
+
+        BuiltIn().run_keyword("Turn Power Supply", psu_alias, "on")
+        BuiltIn().run_keyword("Power Supply Should Be", psu_alias, "on")
+        BuiltIn().run_keyword("Turn Power Supply", psu_alias, "off")
+        BuiltIn().run_keyword("Power Supply Should Be", psu_alias, "off")
+
+    # ---
+
+    @keyword
+    def power_supply_simple_dummy_load_test(self, psu_al, ammeter_al, voltmeter_al, voltage_value, resistor_value, error_margin):
+        """
+        """
+
+        BuiltIn().run_keyword("Turn Off Power Supply", psu_al)
+        BuiltIn().run_keyword("Set Power Supply Voltage Goal", psu_al, voltage_value)
+        BuiltIn().run_keyword("Turn On Power Supply", psu_al)
+
+        BuiltIn().run_keyword("Sleep", 1)
+
+        value = BuiltIn().run_keyword("Read Voltmeter Measure", voltmeter_al)
+
+        BuiltIn().run_keyword("Log", value)
+
+        # check voltmeter 3V
+        # check ampermeter   ~ ( 3/resistor_value)  +/- error_margin
+
+
+        # # Test voltage goal
+        # BuiltIn().run_keyword("Set Power Supply Voltage Goal", psu_al, 3.3)
+
+        # # Test current limit
+        # BuiltIn().run_keyword("Set Power Supply Current Goal", psu_al, 2)
+        # BuiltIn().run_keyword("Set Power Supply Current Goal", psu_al, 0.1)
+
+        # # Try to turn on and off
+        # BuiltIn().run_keyword("Power Supply Should Be", psu_al, "on")
+        # BuiltIn().run_keyword("Power Supply Should Be", psu_al, "off")
+
+        # BuiltIn().run_keyword("Turn Power Supply", psu_al, "on")
+        # BuiltIn().run_keyword("Power Supply Should Be", psu_al, "on")
+        # BuiltIn().run_keyword("Turn Power Supply", psu_al, "off")
+        # BuiltIn().run_keyword("Power Supply Should Be", psu_al, "off")
+
 
