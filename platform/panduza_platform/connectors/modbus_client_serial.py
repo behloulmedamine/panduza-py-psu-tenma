@@ -122,77 +122,60 @@ class ConnectorModbusClientSerial(ConnectorModbusClientBase):
             ConnectorModbusClientSerial.log.info(f"Connection failed")
             raise Exception("Error cannot connect to Serial Port")
 
-    ###########################################################################
-    ###########################################################################
+    # ---
 
-    async def write_register(self, address: int, value, unit: int = 1):
+    async def write_register(self, address: int, value, slave: int = 1):
         async with self._mutex:
-            response = await self.client.write_register(address, value, slave=unit)
+            response = await self.client.write_register(address, value, slave=slave)
             if response.isError():
                 raise Exception(f'Error message: {response}')
 
-    ###########################################################################
-    ###########################################################################
+    # ---
 
-    async def read_input_registers(self, address: int, size: int = 1, unit: int = 1):
+    async def read_input_registers(self, address: int, size: int = 1, slave: int = 1):
         async with self._mutex:
-            response = await self.client.read_input_registers(address, size, slave=unit)
+            response = await self.client.read_input_registers(address, size, slave=slave)
             if not response.isError():
                 return response.registers
             else:
                 raise Exception(f'Error message: {response}')
 
-    ###########################################################################
-    ###########################################################################
+    # ---
 
-    async def read_holding_registers(self, address: int, size: int = 1, unit: int = 1):
+    async def read_holding_registers(self, address: int, size: int = 1, slave: int = 1):
         async with self._mutex:
-            response = await self.client.read_holding_registers(address=address, count=size, slave=unit)
+            response = await self.client.read_holding_registers(address=address, count=size, slave=slave)
             if not response.isError():
                 return response.registers
             else:
                 raise Exception(f'Error message: {response}')
 
+    # ---
+
+    async def read_coils(self, address: int, size: int = 1, slave: int = 1):
+        async with self._mutex:
+            response = self.client.read_coils(address=address, count=size, slave=slave)
+            if not response.isError():
+                return response.bits
+            else:
+                raise Exception(f'Error message: {response}')
+
+    # ---
+
+    async def write_coils(self, address: int, value: bool, slave: int = 1):
+        async with self._mutex:
+            response = self.client.write_coils(address=address, values=value, slave=slave)
+            if not response.isError():
+                return response.__dict__
+            else:
+                raise Exception(f'Error message: {response}')
 
 
-    # async def read_coils(self, address: int, size: int = 1, unit: int = 1):
+    # def read_discrete_inputs(self, address: int, size: int = 1, slave: int = 1):
     #     """
     #     """
     #     with self._mutex:
-    #         response = self.client.read_coils(address=address, count=size, slave=unit)
-    #         if not response.isError():
-    #             return response.bits
-    #         else:
-    #             raise Exception(f'Error message: {response}')
-
-    # async def write_coils(self, address: int, value: bool, slave: int = 1):
-    #     """
-    #     """
-    #     with self._mutex:
-    #         response = self.client.write_coils(address=address, values=value, slave=slave)
-    #         if not response.isError():
-    #             return response.__dict__
-    #         else:
-    #             raise Exception(f'Error message: {response}')
-        
-    # async def write_coil(self, address: int, value: bool, slave: int = 1):
-    #     """
-    #     write to single coil register
-    #     """
-    #     with self._mutex:
-    #         self.log.info("inside write")
-    #         response = self.client.write_coil(address=address, value=value, slave=slave)
-    #         if not response.isError():
-    #             return response.value
-    #         else:
-    #             raise Exception(f'Error message: {response}')
-        
-
-    # def read_discrete_inputs(self, address: int, size: int = 1, unit: int = 1):
-    #     """
-    #     """
-    #     with self._mutex:
-    #         response = self.client.read_discrete_inputs(address=address, count=size, slave=unit)    
+    #         response = self.client.read_discrete_inputs(address=address, count=size, slave=slave)    
     #         if not response.isError():
     #             return response.bits[0]
     #         else:

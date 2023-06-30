@@ -3,7 +3,6 @@ from ...platform_device_model import PlatformDeviceModel
 
 USBID_VENDOR="1a86"
 USBID_MODEL="7523"
-TTY_BASE="/dev/ttyUSB"
 
 class DeviceHanmatekHm310t(PlatformDeviceModel):
     """Power Supply From Hanmatek
