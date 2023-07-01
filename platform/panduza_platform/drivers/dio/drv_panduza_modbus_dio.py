@@ -2,6 +2,9 @@ from hamcrest import assert_that, has_key, instance_of
 from ...meta_drivers.dio import MetaDriverDio
 from panduza_platform.connectors.modbus_client_serial import ConnectorModbusClientSerial
 
+DIO_OFFSET_PULLS = 32
+DIO_OFFSET_WRITE = 64
+
 class DriverFakeDio(MetaDriverDio):
 
     # =============================================================================
@@ -45,7 +48,7 @@ class DriverFakeDio(MetaDriverDio):
     # ---
 
     async def _PZA_DRV_DIO_get_direction_value(self):
-        return self.modbus.read_coil(self.id, 1, self.modbus_slave)
+        return await self.modbus.read_coil(self.id, 1, self.modbus_slave)
 
     # ---
 
@@ -54,57 +57,68 @@ class DriverFakeDio(MetaDriverDio):
         -  Args
             value : value to be set : in or out
         """
+        register_data = None
         if   value == "out":
-            self.modbus.write_coils(self.id, True, self.modbus_slave)
+            register_data = True
         elif value == "in":
-            self.modbus.write_coils(self.id, False, self.modbus_slave)
+            register_data = False
         else:
-            raise Exception("error in value")
+            raise Exception(f"Error invalid value {value}")
+        await self.modbus.write_coils(self.id, register_data, self.modbus_slave)
 
     # ---
 
     async def _PZA_DRV_DIO_get_direction_pull(self):
         """ get direction pull
         """
-        return self.__fakes["direction"]["pull"]
+        return await self.modbus.read_coil(DIO_OFFSET_PULLS + self.id, 1, self.modbus_slave)
 
     # ---
 
-    async def _PZA_DRV_DIO_set_direction_pull(self, v):
+    async def _PZA_DRV_DIO_set_direction_pull(self, value):
         """ set the pull direction
         -Args
         value : value to be set : up, down or open
         """
-        self.__fakes["direction"]["pull"] = v
+        register_data = None
+        if value == "up":
+            register_data = True
+        elif value == "down":
+            register_data = False
+        else:
+            raise Exception(f"Error invalid value {value}")
+        self.modbus.write_coil(DIO_OFFSET_PULLS + self.id, register_data, self.modbus_slave)
 
     # ---
 
     async def _PZA_DRV_DIO_get_state_active(self):
         """ get the active state
         """
-        return self.__fakes["state"]["active"]
+        return await self.modbus.read_discrete_inputs(self.id+1, 1, self.modbus_slave)
 
     # ---
 
-    async def _PZA_DRV_DIO_set_state_active(self,v):
+    async def _PZA_DRV_DIO_set_state_active(self, v):
         """ get the active state
         -Args
         value : value to be set : True or False
         """
-        self.__fakes["state"]["active"] = v
+        await self.modbus.write_coil(DIO_OFFSET_WRITE + self.id, v, self.modbus_slave)
 
     # ---
 
     async def _PZA_DRV_DIO_get_state_activeLow(self):
         """ get the active low state
         """
-        return self.__fakes["state"]["active_low"]
+        # return self.__fakes["state"]["active_low"]
+        return False
 
     # ---
 
     async def _PZA_DRV_DIO_set_state_activeLow(self,v):
         """
         """
-        self.__fakes["state"]["active_low"] = v
+        # self.__fakes["state"]["active_low"] = v
+        pass
 
 

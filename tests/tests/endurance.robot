@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation        Multiple test to see the behaviour on the long run
 
-Resource            ../rsc/fake_bench.resource
+Resource            bench.resource
 
 Suite Setup         Setup Bench Config
 

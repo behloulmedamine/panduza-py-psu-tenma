@@ -36,14 +36,28 @@ class KeywordsDio(object):
     ###########################################################################
 
     @keyword
-    def set_dio_state(self, dio_alias, state, ensure=True):
+    def set_dio_active(self, dio_alias, state, ensure=True):
         """
         """
         pza = BuiltIn().get_variable_value("${__pza__}")
         pza[dio_alias].state.active.set(bool(state), ensure)
 
     @keyword
-    def change_dio_logic_active_low(self, dio_alias, active_low, ensure=True):
+    def active_dio(self, dio_alias, ensure=True):
+        """
+        """
+        pza = BuiltIn().get_variable_value("${__pza__}")
+        pza[dio_alias].state.active.set(True, ensure)
+
+    @keyword
+    def desactive_dio(self, dio_alias, ensure=True):
+        """
+        """
+        pza = BuiltIn().get_variable_value("${__pza__}")
+        pza[dio_alias].state.active.set(True, ensure)
+
+    @keyword
+    def set_dio_logic_active_low(self, dio_alias, active_low, ensure=True):
         """Set the state active low
         """
         pza = BuiltIn().get_variable_value("${__pza__}")
@@ -72,9 +86,9 @@ class KeywordsDio(object):
         BuiltIn().run_keyword("Set Dio Internal Resistor", dio_alias, "down")
         BuiltIn().run_keyword("Set Dio Internal Resistor", dio_alias, "open")
 
-        BuiltIn().run_keyword("Set Dio State", dio_alias, True)
-        BuiltIn().run_keyword("Set Dio State", dio_alias, False)
+        BuiltIn().run_keyword("Set Dio Active", dio_alias, True)
+        BuiltIn().run_keyword("Set Dio Active", dio_alias, False)
 
-        BuiltIn().run_keyword("Change dio logic active low", dio_alias, True)
-        BuiltIn().run_keyword("Change dio logic active low", dio_alias, False)
+        BuiltIn().run_keyword("Set dio logic active low", dio_alias, True)
+        BuiltIn().run_keyword("Set dio logic active low", dio_alias, False)
 

@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation        Basic tests for panduza interfaces
 
-Resource            ../rsc/fake_bench.resource
+Resource            bench.resource
 
 Suite Setup         Setup Bench Config
 

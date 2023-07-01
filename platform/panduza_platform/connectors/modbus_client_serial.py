@@ -154,7 +154,7 @@ class ConnectorModbusClientSerial(ConnectorModbusClientBase):
 
     async def read_coils(self, address: int, size: int = 1, slave: int = 1):
         async with self._mutex:
-            response = self.client.read_coils(address=address, count=size, slave=slave)
+            response = await self.client.read_coils(address=address, count=size, slave=slave)
             if not response.isError():
                 return response.bits
             else:
@@ -164,20 +164,19 @@ class ConnectorModbusClientSerial(ConnectorModbusClientBase):
 
     async def write_coils(self, address: int, value: bool, slave: int = 1):
         async with self._mutex:
-            response = self.client.write_coils(address=address, values=value, slave=slave)
+            response = await self.client.write_coils(address=address, values=value, slave=slave)
             if not response.isError():
                 return response.__dict__
             else:
                 raise Exception(f'Error message: {response}')
 
+    # ---
 
-    # def read_discrete_inputs(self, address: int, size: int = 1, slave: int = 1):
-    #     """
-    #     """
-    #     with self._mutex:
-    #         response = self.client.read_discrete_inputs(address=address, count=size, slave=slave)    
-    #         if not response.isError():
-    #             return response.bits[0]
-    #         else:
-    #             raise Exception(f'Error message: {response}')
+    async def read_discrete_inputs(self, address: int, size: int = 1, slave: int = 1):
+        async with self._mutex:
+            response = await self.client.read_discrete_inputs(address=address, count=size, slave=slave)
+            if not response.isError():
+                return response.bits[0]
+            else:
+                raise Exception(f'Error message: {response}')
 

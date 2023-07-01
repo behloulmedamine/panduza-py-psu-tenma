@@ -1,6 +1,5 @@
 
-
-export PZA_ALIASES='{
+PZA_ALIASES={
     "local": {
         "url": "localhost",
         "port": 1883,
@@ -16,9 +15,5 @@ export PZA_ALIASES='{
             "fake_dio_1": "pza/default/Panduza_FakeDioController/dio_1"
         }
     }
-}'
+}
 
-
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
-echo PZA_ALIASES=$PZA_ALIASES > $SCRIPT_DIR/fake_bench.env
