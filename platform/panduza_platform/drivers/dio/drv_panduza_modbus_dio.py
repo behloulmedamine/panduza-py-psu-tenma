@@ -5,7 +5,7 @@ from panduza_platform.connectors.modbus_client_serial import ConnectorModbusClie
 DIO_OFFSET_PULLS = 32
 DIO_OFFSET_WRITE = 64
 
-class DriverFakeDio(MetaDriverDio):
+class DriverPanduzaModbusDio(MetaDriverDio):
 
     # =============================================================================
     # FROM MetaDriverDio
@@ -48,7 +48,13 @@ class DriverFakeDio(MetaDriverDio):
     # ---
 
     async def _PZA_DRV_DIO_get_direction_value(self):
-        return await self.modbus.read_coil(self.id, 1, self.modbus_slave)
+        
+        
+        coils = await self.modbus.read_coils(self.id, 1, self.modbus_slave)
+        
+        self.log.debug(f"{self.id} coills {coils}")
+        
+        return coils
 
     # ---
 
@@ -71,7 +77,7 @@ class DriverFakeDio(MetaDriverDio):
     async def _PZA_DRV_DIO_get_direction_pull(self):
         """ get direction pull
         """
-        return await self.modbus.read_coil(DIO_OFFSET_PULLS + self.id, 1, self.modbus_slave)
+        return await self.modbus.read_coils(DIO_OFFSET_PULLS + self.id, 1, self.modbus_slave)
 
     # ---
 
@@ -87,7 +93,7 @@ class DriverFakeDio(MetaDriverDio):
             register_data = False
         else:
             raise Exception(f"Error invalid value {value}")
-        await self.modbus.write_coil(DIO_OFFSET_PULLS + self.id, register_data, self.modbus_slave)
+        await self.modbus.write_coils(DIO_OFFSET_PULLS + self.id, register_data, self.modbus_slave)
 
     # ---
 

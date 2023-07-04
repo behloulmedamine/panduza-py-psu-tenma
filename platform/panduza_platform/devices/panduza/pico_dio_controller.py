@@ -1,7 +1,7 @@
 from ...platform_device_model import PlatformDeviceModel
 
-USBID_VENDOR="05e1"
-USBID_MODEL="16c0"
+USBID_VENDOR="16c0"
+USBID_MODEL="05e1"
 
 SERIAL_BAUDRATE=112500
 
@@ -23,7 +23,7 @@ class DevicePanduzaPicoDioController(PlatformDeviceModel):
         # SERIAL_SHORT=E6616407E3353C27
 
         interfaces = []
-        for id in range(0, 1):
+        for id in range(0, 22):
             interfaces.append({
                 "name": f"dio_{id}",
                 "driver": "panduza.modbus.dio",

@@ -36,6 +36,13 @@ class KeywordsDio(object):
     ###########################################################################
 
     @keyword
+    def get_dio_activation_state(self, dio_alias):
+        """
+        """
+        pza = BuiltIn().get_variable_value("${__pza__}")
+        return pza[dio_alias].state.active.get()
+
+    @keyword
     def set_dio_active(self, dio_alias, state, ensure=True):
         """
         """
