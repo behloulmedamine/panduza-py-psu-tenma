@@ -22,7 +22,6 @@ class DriverFakeDio(MetaDriverDio):
         """Init function
         Reset fake parameters
         """
-
         # Load settings
         assert_that(tree, has_key("settings"))
         settings = tree["settings"]
@@ -39,6 +38,7 @@ class DriverFakeDio(MetaDriverDio):
         # Settings
         self.id = int(settings["dio_id"])
         self.modbus_slave = settings["modbus_slave"]
+        self.activeLow = False
         # Get the gate connector
         self.modbus = await ConnectorModbusClientSerial.Get(**settings)
 
@@ -87,38 +87,32 @@ class DriverFakeDio(MetaDriverDio):
             register_data = False
         else:
             raise Exception(f"Error invalid value {value}")
-        self.modbus.write_coil(DIO_OFFSET_PULLS + self.id, register_data, self.modbus_slave)
+        await self.modbus.write_coil(DIO_OFFSET_PULLS + self.id, register_data, self.modbus_slave)
 
     # ---
 
     async def _PZA_DRV_DIO_get_state_active(self):
-        """ get the active state
-        """
         return await self.modbus.read_discrete_inputs(self.id+1, 1, self.modbus_slave)
 
     # ---
 
     async def _PZA_DRV_DIO_set_state_active(self, v):
-        """ get the active state
-        -Args
-        value : value to be set : True or False
-        """
-        await self.modbus.write_coil(DIO_OFFSET_WRITE + self.id, v, self.modbus_slave)
+        cmd_value = v
+        if self.activeLow:
+            if v:
+                cmd_value = False
+            else:
+                cmd_value = True
+        await self.modbus.write_coil(DIO_OFFSET_WRITE + self.id, cmd_value, self.modbus_slave)
 
     # ---
 
     async def _PZA_DRV_DIO_get_state_activeLow(self):
-        """ get the active low state
-        """
-        # return self.__fakes["state"]["active_low"]
-        return False
+        return self.activeLow
 
     # ---
 
-    async def _PZA_DRV_DIO_set_state_activeLow(self,v):
-        """
-        """
-        # self.__fakes["state"]["active_low"] = v
-        pass
+    async def _PZA_DRV_DIO_set_state_activeLow(self, v):
+        self.activeLow = v
 
 
