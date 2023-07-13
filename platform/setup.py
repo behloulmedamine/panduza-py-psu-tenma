@@ -26,6 +26,7 @@ setup(
     install_requires=[
         'aardvark-py',
         'colorama',
+        'PyHamcrest==2.0.4',
         'paho-mqtt',
         'pyftdi',
         'pymodbus==3.3.2',
