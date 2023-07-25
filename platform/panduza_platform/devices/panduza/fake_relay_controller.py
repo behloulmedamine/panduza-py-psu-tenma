@@ -1,4 +1,4 @@
-from ...platform_device_model import PlatformDeviceModel
+from core.platform_device_model import PlatformDeviceModel
 
 class DevicePanduzaFakeRelayController(PlatformDeviceModel):
 
@@ -13,7 +13,7 @@ class DevicePanduzaFakeRelayController(PlatformDeviceModel):
         """
         """
 
-        number_of_channel = self._initial_settings.get("number_of_channel", 1)
+        number_of_channel = int( self._initial_settings.get("number_of_channel", 1) )
 
         interfaces = []
         for chan in range(0, number_of_channel):
