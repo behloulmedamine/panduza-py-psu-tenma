@@ -28,7 +28,7 @@ RUN mkdir -p /etc/panduza
 WORKDIR /setup
 COPY . /setup/
 RUN pip install .
-RUN cp -v ./deploy/pza-py-platform-run.py /usr/local/bin/pza-py-platform-run.py
+# RUN cp -v ./deploy/pza-py-platform-run.py /usr/local/bin/pza-py-platform-run.py
 
 # Allow plugin insertion here
 ENV PYTHONPATH="/etc/panduza/plugins/py"
@@ -39,4 +39,5 @@ WORKDIR /work
 # Create the directory for platform plugins
 # Then run the platform
 CMD mkdir -p /etc/panduza/plugins/py; \
-    python3 /usr/local/bin/pza-py-platform-run.py
+    python3 /usr/local/lib/python3.10/dist-packages/panduza_platform/__main__.py
+    
