@@ -461,7 +461,7 @@ class Platform:
         # Example
         # device_cfg =
         # {
-        #    "model": "Panduza.FakePsu"
+        #    "model": "Panduza.FakeBps"
         # }
         for device_cfg in self.tree["devices"]:
 
