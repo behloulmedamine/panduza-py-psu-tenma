@@ -3,7 +3,7 @@ from .fake_bps_controller import DevicePanduzaFakeBps
 from .fake_relay_controller import DevicePanduzaFakeRelayController
 
 PZA_DEVICES_LIST= [ 
-    DevicePanduzaFakeDioController,
+    #DevicePanduzaFakeDioController,
     DevicePanduzaFakeBps,
-    DevicePanduzaFakeRelayController
+    #DevicePanduzaFakeRelayController
 ]

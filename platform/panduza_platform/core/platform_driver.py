@@ -42,6 +42,9 @@ class PlatformDriver(PlatformWorker):
 
     # ---
 
+    def set_device(self, device):
+        self.device = device
+
     def set_tree(self, tree):
         self.tree = tree
 

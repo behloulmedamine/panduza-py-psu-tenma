@@ -91,11 +91,11 @@ class DriverIPS4303S(MetaDriverBps):
         self.amps = 0
 
         # Constants Fields settings
-        self._PZA_DRV_BPS_update_volts_min_max(VOLTS_BOUNDS["min"], VOLTS_BOUNDS["max"])
-        self._PZA_DRV_BPS_update_amps_min_max(AMPS_BOUNDS["min"], AMPS_BOUNDS["max"])
+        self._PZA_DRV_BPS_CTRL_update_volts_min_max(VOLTS_BOUNDS["min"], VOLTS_BOUNDS["max"])
+        self._PZA_DRV_BPS_CTRL_update_amps_min_max(AMPS_BOUNDS["min"], AMPS_BOUNDS["max"])
 
         # Misc
-        self._PZA_DRV_BPS_update_misc("model", "IPS4303S (RS Pro)")
+        self._PZA_DRV_BPS_CTRL_update_misc("model", "IPS4303S (RS Pro)")
 
         # Call meta class BPS ini
         super()._PZA_DRV_loop_init(tree)
@@ -115,25 +115,25 @@ class DriverIPS4303S(MetaDriverBps):
     ###########################################################################
     ###########################################################################
 
-    def _PZA_DRV_BPS_read_enable_value(self):
+    def _PZA_DRV_BPS_CTRL_read_enable_value(self):
         return self.state
 
-    def _PZA_DRV_BPS_write_enable_value(self, v):
+    def _PZA_DRV_BPS_CTRL_write_enable_value(self, v):
         self.state = v
         cmd = STATE_VALUE_ENUM[v]
         self.__write(f"OUT{int(cmd)}")
 
-    def _PZA_DRV_BPS_read_volts_goal(self):
+    def _PZA_DRV_BPS_CTRL_read_volts_goal(self):
         return self.volts
 
-    def _PZA_DRV_BPS_write_volts_goal(self, v):
+    def _PZA_DRV_BPS_CTRL_write_volts_goal(self, v):
         self.volts = v
         self.__write(f"VSET1:{v:.3f}")
 
-    def _PZA_DRV_BPS_read_amps_goal(self):
+    def _PZA_DRV_BPS_CTRL_read_amps_goal(self):
         return self.amps
     
-    def _PZA_DRV_BPS_write_amps_goal(self, v):
+    def _PZA_DRV_BPS_CTRL_write_amps_goal(self, v):
         self.amps = v
         self.__write(f"ISET1:{v:.3f}")
 
