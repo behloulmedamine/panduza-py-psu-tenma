@@ -247,10 +247,10 @@ class Platform:
 
     # --
 
-    def load_interface(self, bench_name, device_name, interface_config):
+    def load_interface(self, bench_name, device_name, interface_config, device = None):
         """Load a new interface
         """
-        instance = self.driver_factory.produce_interface(bench_name, device_name, interface_config)
+        instance = self.driver_factory.produce_interface(bench_name, device_name, interface_config, device)
         self.interfaces.append(instance)
 
     # --
@@ -523,11 +523,11 @@ class Platform:
             # device == class type for device
             device = self.device_factory.produce_device(device_cfg)
 
-            device_name = device_cfg["model"].replace(".", "_")
+            device_name = device_cfg["name"].replace(".", "_")
 
             interfaces = device._PZA_DEV_interfaces()
             self.log.info(f"{device_name} => {interfaces}")
             for interface_config in interfaces:
-                self.load_interface("default", device_name, interface_config)
+                self.load_interface("default", device_name, interface_config, device = device)
 
 

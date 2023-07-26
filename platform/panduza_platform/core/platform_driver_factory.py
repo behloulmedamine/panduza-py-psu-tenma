@@ -18,7 +18,7 @@ class PlatformDriverFactory:
 
     # ---
 
-    def produce_interface(self, bench_name, device_name, interface_config):
+    def produce_interface(self, bench_name, device_name, interface_config, device = None):
         """
         """
         try:
@@ -35,6 +35,7 @@ class PlatformDriverFactory:
             instance.set_platform(self.__platform)
             instance.set_bench_name(bench_name)
             instance.set_device_name(device_name)
+            instance.set_device(device)
             instance.set_tree(interface_config)
 
             self.__log.info(f"> {name} [{driver_name}]")
@@ -72,7 +73,7 @@ class PlatformDriverFactory:
                 raise InitializationError(f"'name' field is not found in config of driver {dev} => config:{dev_config}")
 
             # Register driver
-            name = dev()._PZA_DRV_config()['name']
+            name = dev_config['name']
             self.__drivers[name] = dev
             self.__log.info(f"Register driver: '{name}'")
 

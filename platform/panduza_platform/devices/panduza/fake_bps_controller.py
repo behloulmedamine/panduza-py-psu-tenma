@@ -1,29 +1,34 @@
 from core.platform_device_model import PlatformDeviceModel
 
+import sys
 class DevicePanduzaFakeBps(PlatformDeviceModel):
 
-    def _PZA_DEV_config(self):
+    def __init__(self, settings = {}) -> None:
+        """Constructor
         """
-        """
-        return {
-            "model": "Panduza.FakeBps",
-        }
+        super().__init__(settings)
+        
+        self._number_of_channel = int( self._initial_settings.get("number_of_channel", 1) )
+        
+        super()._PZA_DEV_set_model("FakeBps")
+        super()._PZA_DEV_set_manufacturer("Panduza")
+        super()._PZA_DEV_set_characteristics({
+            "number_of_channel": self._number_of_channel
+        })
 
     def _PZA_DEV_interfaces(self):
         """
         """
+        super()._PZA_DEV_interfaces()
 
-        number_of_channel = int( self._initial_settings.get("number_of_channel", 1) )
-
-        interfaces = []
-        for chan in range(0, number_of_channel):
-            interfaces.append(
+        for chan in range(0, self._number_of_channel):
+            self._interfaces.append(
                 {
-                    "name": f"channel_{chan}",
-                    "driver": "panduza.fake.bps"
+                    "name": f"channel_{chan}_ctrl",
+                    "driver": "panduza.fake.bps_control"
                 }
             )
-            interfaces.append(
+            self._interfaces.append(
                 {
                     "name": f"channel_{chan}_am",
                     "driver": "panduza.fake.ammeter",
@@ -32,14 +37,14 @@ class DevicePanduzaFakeBps(PlatformDeviceModel):
                     }
                 }
             )
-            interfaces.append(
+            self._interfaces.append(
                 {
                     "name": f"channel_{chan}_vl",
                     "driver": "panduza.fake.voltmeter",
                 }
             )
 
-        return interfaces
+        return self._interfaces
 
 
 
