@@ -10,6 +10,7 @@ class DevicePanduzaFakeBps(PlatformDeviceModel):
         
         self._number_of_channel = int( self._initial_settings.get("number_of_channel", 1) )
         
+        super()._PZA_DEV_set_family("bps")
         super()._PZA_DEV_set_model("FakeBps")
         super()._PZA_DEV_set_manufacturer("Panduza")
         super()._PZA_DEV_set_characteristics({

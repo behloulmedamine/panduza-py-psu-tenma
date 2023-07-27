@@ -30,7 +30,8 @@ class DriverDevice(PlatformDriver):
 
         print("DriverDevice: _PZA_DRV_loop_init", self.device)
         await self._update_attributes_from_dict({
-            "identify": {
+            "identity": {
+                "family": self.device._family,
                 "name": self.device._model,
                 "manufacturer": self.device._manufacturer,
             }
