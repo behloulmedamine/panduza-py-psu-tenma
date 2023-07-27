@@ -20,30 +20,30 @@ class DevicePanduzaFakeBps(PlatformDeviceModel):
     def _PZA_DEV_interfaces(self):
         """
         """
-        super()._PZA_DEV_interfaces()
-
-        for chan in range(0, self._number_of_channel):
-            self._interfaces.append(
-                {
-                    "name": f"channel_{chan}_ctrl",
-                    "driver": "panduza.fake.bps_control"
-                }
-            )
-            self._interfaces.append(
-                {
-                    "name": f"channel_{chan}_am",
-                    "driver": "panduza.fake.ammeter",
+        print("MDRR\n\n")
+        super()._PZA_DEV_create_united_interfaces(
+            "channel", 0, self._number_of_channel,
+            {
+                "ctrl": {
+                    "driver": "panduza.fake.bps_control",
                     "settings": {
-                        "work_with_fake_bps": f"!//channel_{chan}"
+                        "test": "tset"
                     }
+                },
+                "am": {
+                    "driver": "panduza.fake.ammeter"
+                },
+                "vm": {
+                    "driver": "panduza.fake.voltmeter"
                 }
-            )
-            self._interfaces.append(
-                {
-                    "name": f"channel_{chan}_vl",
-                    "driver": "panduza.fake.voltmeter",
-                }
-            )
+            }
+        )
+
+
+        for itf in self._interfaces:
+            print(itf)
+
+        print("MDRR\n\n")
 
         return self._interfaces
 

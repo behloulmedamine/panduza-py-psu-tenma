@@ -28,9 +28,7 @@ class PlatformDeviceModel:
             raise Exception("Manufacturer is not set")
         if self._characteristics == None:
             raise Warning("Characteristics is not set")
-        
         self._PZA_DEV_set_name()
-        
         return {
             "family": self._family,
             "model": self._model,
@@ -70,3 +68,20 @@ class PlatformDeviceModel:
         """
         """
         self._characteristics = characteristics
+
+    def _PZA_DEV_create_united_interfaces(self, name, start, len, list_of_interfaces):
+        """
+        """
+        for i in range(start, start + len):
+            for key, value in list_of_interfaces.items():
+                if not isinstance(value, dict):
+                    raise Exception("United interface value is not a dict")
+                if "driver" not in value:
+                    raise Exception("United interface value does not have interface key")
+                self._interfaces.append({
+                    "name": ":" + name + "_" + str(i) + ":" + key,
+                    "driver": value["driver"],
+                    "settings": value.get("settings", {})
+                })
+                
+
