@@ -38,13 +38,6 @@ class MetaDriverRelay(PlatformDriver):
 
     # ---
 
-    async def _PZA_DRV_cmds_set(self, loop, payload):
-        cmds = self.payload_to_dict(payload)
-        # self.log.debug(f"cmds as json : {cmds}")
-        for att in self.__cmd_handlers:
-            if att in cmds:
-                await self.__cmd_handlers[att](cmds[att])
-
     # =============================================================================
     # TO OVERRIDE IN DRIVER
 

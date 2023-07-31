@@ -20,6 +20,7 @@ class PlatformDriver(PlatformWorker):
     def __init__(self) -> None:
         self._pclient = None
         self.__err_string = ""
+        self.__cmd_handlers = {}
         super().__init__()
 
     # =============================================================================
@@ -189,16 +190,17 @@ class PlatformDriver(PlatformWorker):
     async def PZA_WORKER_task(self, loop):
         """
         """
-
         try:
-            
             # 
             if not self._events_pza.empty():
                 event = self._events_pza.get()
                 # If the request is for all interfaces '*'
-                if event["payload"] == b'*':
-                    self.log.info("scan request received !")
-                    await self._push_attribute("info", 0, False) # heartbeat_pulse
+                if event["payload"] == b'*' and self.worker_name.endswith("/device"):
+                    if event["topic"] == "pza":
+                        await self._push_attribute("info", 0, False)
+                    elif event["topic"] == f"pza/{self.worker_name}":
+                        for itf in self.device._PZA_DEV_interface_objs():
+                            await itf._push_attribute("info", 0, False)
 
             if not self._events_cmds.empty():
                 event = self._events_cmds.get()
@@ -286,6 +288,8 @@ class PlatformDriver(PlatformWorker):
         if not self.__topics_subscribed:
             # Register the common discovery topic 'pza'
             self._pclient.subscribe("pza", self.__on_pza_message)
+            if self.worker_name.endswith("/device"):
+                self._pclient.subscribe(f"pza/{self.worker_name}", self.__on_pza_message)
             # Register to all commands
             self._pclient.subscribe(self.topic_cmds + "#", self.__on_cmds_message)
             # Valid the flag
@@ -527,7 +531,11 @@ class PlatformDriver(PlatformWorker):
     async def _PZA_DRV_cmds_set(self, loop, payload):
         """Must apply the command on the driver
         """
-        pass
+        cmds = self.payload_to_dict(payload)
+        # self.log.debug(f"cmds as json : {cmds}")
+        for att in self.__cmd_handlers:
+            if att in cmds:
+                await self.__cmd_handlers[att](cmds[att])
 
 
 

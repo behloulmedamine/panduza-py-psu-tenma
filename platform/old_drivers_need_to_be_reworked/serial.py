@@ -36,16 +36,6 @@ class MetaDriverSerial(MetaDriver):
     def _PZA_DRV_loop_run(self, loop):
         pass
 
-    def _PZA_DRV_cmds_set(self, loop, payload):
-        """From MetaDriver
-        """
-        cmds = self.payload_to_dict(payload)
-        # self.log.debug(f"cmds as json : {cmds}")
-        for att in self.__cmd_handlers:
-            if att in cmds:
-                self.__cmd_handlers[att](cmds[att])
-        
-
     ###########################################################################
     ###########################################################################
     #

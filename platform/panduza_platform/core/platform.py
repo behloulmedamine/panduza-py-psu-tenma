@@ -52,6 +52,9 @@ class Platform:
         # Drivers
         self.drivers = []
 
+        # Devices
+        self.devices = []
+
         # Interfaces
         self.interfaces = []
 
@@ -332,7 +335,6 @@ class Platform:
 
             # attach clients   os.remove(myfile)to thread
 
-
             for interface in self.interfaces:
                 interface.attach_pclient(client)
 
@@ -529,5 +531,4 @@ class Platform:
             self.log.info(f"{device_name} => {interfaces}")
             for interface_config in interfaces:
                 self.load_interface("default", device_name, interface_config, device = device)
-
-
+            self.devices.append(device)

@@ -1,6 +1,7 @@
 import time
 from core.platform_driver import PlatformDriver
 import sys
+import traceback
 
 class DriverDevice(PlatformDriver):
     """
@@ -27,8 +28,6 @@ class DriverDevice(PlatformDriver):
     async def _PZA_DRV_loop_init(self, loop, tree):
         """From PlatformDriver
         """
-
-        print("DriverDevice: _PZA_DRV_loop_init", self.device)
         await self._update_attributes_from_dict({
             "identity": {
                 "family": self.device._family,
@@ -39,4 +38,3 @@ class DriverDevice(PlatformDriver):
 
         # Tell the platform that the init state end sucessfuly
         self._PZA_DRV_init_success()
-

@@ -32,6 +32,7 @@ class PlatformDeviceFactory:
         # Produce the device
         try:
             dev = self.__devices[name](config.get("settings", {}))
+            dev._PZA_DEV_config()
             self.__platform.load_interface("default", name.replace(".", "_"), {
                     "name": "device",
                     "driver": "py.device"

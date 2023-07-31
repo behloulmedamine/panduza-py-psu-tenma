@@ -1,5 +1,7 @@
 import abc
 import sys
+import traceback
+from .platform_worker import PlatformWorker
 
 class PlatformDeviceModel:
     """Mother class for device models
@@ -10,13 +12,13 @@ class PlatformDeviceModel:
         """
         self._initial_settings = settings
         self._interfaces = []
+        self._interfaces_obj = []
         self._model = None
         self._manufacturer = None
         self._characteristics = {}
         self._family = None
         self.name = None
 
-    @abc.abstractmethod
     def _PZA_DEV_config(self):
         """
         """
@@ -36,18 +38,21 @@ class PlatformDeviceModel:
             "characteristics": self._characteristics
         }
 
-    @abc.abstractmethod
     def _PZA_DEV_interfaces(self):
         
         """
         """
+
+    def _PZA_DEV_interface_objs(self):
+        """
+        """
+        return self._interfaces_obj
 
     def _PZA_DEV_set_family(self, family):
         """
         """
         self._family = family
 
-    # set model
     def _PZA_DEV_set_model(self, model):
         """
         """
@@ -58,7 +63,6 @@ class PlatformDeviceModel:
         """
         self.name = self._model + "_" + self._manufacturer
 
-    # set manufacturer
     def _PZA_DEV_set_manufacturer(self, manufacturer):
         """
         """
@@ -83,5 +87,8 @@ class PlatformDeviceModel:
                     "driver": value["driver"],
                     "settings": value.get("settings", {})
                 })
-                
 
+    def add_interface_obj(self, interface):
+        """
+        """
+        self._interfaces_obj.append(interface)

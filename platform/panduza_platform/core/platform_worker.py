@@ -20,7 +20,7 @@ class PlatformWorker(metaclass=abc.ABCMeta):
         self.__thread.handle_worker_panic(self.PZA_WORKER_name())
 
     def stop(self):
-        self.__alive = False
+        self._alive = False
 
     async def task(self, loop):
         """
