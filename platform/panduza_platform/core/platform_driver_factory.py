@@ -37,6 +37,8 @@ class PlatformDriverFactory:
             instance.set_device_name(device_name)
             instance.set_device(device)
             instance.set_tree(interface_config)
+            if device:
+                device.add_interface_obj(instance)
 
             self.__log.info(f"> {name} [{driver_name}]")
 

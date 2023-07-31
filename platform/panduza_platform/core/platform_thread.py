@@ -110,7 +110,8 @@ class PlatformThread:
         report +=f"== STATS THREAD {self.id}\n"
         report += "=================================\n"
         for w in self.__workers:
-            report += w.PZA_WORKER_report()
+            if w.PZA_WORKER_report() is not None:
+                report += w.PZA_WORKER_report()
         return report
 
     # ---

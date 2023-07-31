@@ -20,7 +20,6 @@ class DevicePanduzaFakeBps(PlatformDeviceModel):
     def _PZA_DEV_interfaces(self):
         """
         """
-        print("MDRR\n\n")
         super()._PZA_DEV_create_united_interfaces(
             "channel", 0, self._number_of_channel,
             {
@@ -38,13 +37,6 @@ class DevicePanduzaFakeBps(PlatformDeviceModel):
                 }
             }
         )
-
-
-        for itf in self._interfaces:
-            print(itf)
-
-        print("MDRR\n\n")
-
         return self._interfaces
 
 

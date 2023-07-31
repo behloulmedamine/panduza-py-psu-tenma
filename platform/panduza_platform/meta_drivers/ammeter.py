@@ -47,13 +47,6 @@ class MetaDriverAmmeter(PlatformDriver):
 
     # ---
 
-    async def _PZA_DRV_cmds_set(self, loop, payload):
-        cmds = self.payload_to_dict(payload)
-        # self.log.debug(f"cmds as json : {cmds}")
-        for att in self.__cmd_handlers:
-            if att in cmds:
-                await self.__cmd_handlers[att](cmds[att])
-
     # =============================================================================
     # TO OVERRIDE IN DRIVER
 
@@ -84,11 +77,11 @@ class MetaDriverAmmeter(PlatformDriver):
         """
         while self.alive:
             await asyncio.sleep(self.__polling_cycle)
-            await self._update_attributes_from_dict({
-                "measure": {
-                    "value": await self._PZA_DRV_AMMETER_read_measure_value()
-                }
-            })
+            #await self._update_attributes_from_dict({
+            #    "measure": {
+            #        "value": await self._PZA_DRV_AMMETER_read_measure_value()
+            #    }
+            #})
 
     # ---
 
