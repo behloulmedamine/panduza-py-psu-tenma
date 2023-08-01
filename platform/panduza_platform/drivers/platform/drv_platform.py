@@ -27,7 +27,7 @@ class DriverPlatform(PlatformDriver):
         """From PlatformDriver
         """
         # Update the number of managed interface
-        await self._update_attribute("info", "interfaces", self.platform.get_interface_number())
+        await self._update_attribute("info", "number_of_devices", self.platform.get_number_of_devices())
 
         # Tell the platform that the init state end sucessfuly
         self._PZA_DRV_init_success()

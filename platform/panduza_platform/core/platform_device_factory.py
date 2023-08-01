@@ -22,18 +22,19 @@ class PlatformDeviceFactory:
         """Try to produce the given device model
         """
         # Get model name and control it exists in the config provided by the user
-        if not "name" in config:
+        if not "driver" in config:
             raise InitializationError(f"\"name\" field is not provided in the config {config}")
+        driver = config["driver"]
         name = config["name"]
 
-        if not name in self.__devices:
-            raise InitializationError(f"\"{name}\" is not found in this platform")
+        if not driver in self.__devices:
+            raise InitializationError(f"\"{driver}\" is not found in this platform")
 
         # Produce the device
         try:
-            dev = self.__devices[name](config.get("settings", {}))
+            dev = self.__devices[driver](config.get("settings", {}))
             dev._PZA_DEV_config()
-            self.__platform.load_interface("default", name.replace(".", "_"), {
+            self.__platform.load_interface("default", name, {
                     "name": "device",
                     "driver": "py.device"
             }, dev)

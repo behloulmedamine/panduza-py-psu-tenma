@@ -29,6 +29,12 @@ class DriverDevice(PlatformDriver):
         """From PlatformDriver
         """
         await self._update_attributes_from_dict({
+            "info": {
+                "number_of_interfaces": self.device.number_of_interfaces(),
+            }
+        })
+
+        await self._update_attributes_from_dict({
             "identity": {
                 "family": self.device._family,
                 "name": self.device._model,
