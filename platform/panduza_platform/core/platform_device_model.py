@@ -92,3 +92,8 @@ class PlatformDeviceModel:
         """
         """
         self._interfaces_obj.append(interface)
+
+    def number_of_interfaces(self):
+        """
+        """
+        return len(self._interfaces)

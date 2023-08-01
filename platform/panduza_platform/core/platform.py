@@ -258,10 +258,10 @@ class Platform:
 
     # --
 
-    def get_interface_number(self):
+    def get_number_of_devices(self):
         """
         """
-        return len(self.interfaces)
+        return len(self.devices)
 
     # --
 

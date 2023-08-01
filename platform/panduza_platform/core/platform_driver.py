@@ -46,6 +46,8 @@ class PlatformDriver(PlatformWorker):
     def set_device(self, device):
         self.device = device
 
+    # ---
+
     def set_tree(self, tree):
         self.tree = tree
 
@@ -195,7 +197,7 @@ class PlatformDriver(PlatformWorker):
             if not self._events_pza.empty():
                 event = self._events_pza.get()
                 # If the request is for all interfaces '*'
-                if event["payload"] == b'*' and self.worker_name.endswith("/device"):
+                if event["payload"] == b'*' and self.worker_name.endswith("/device") or "server/platforms" in self.worker_name:
                     if event["topic"] == "pza":
                         await self._push_attribute("info", 0, False)
                     elif event["topic"] == f"pza/{self.worker_name}":
