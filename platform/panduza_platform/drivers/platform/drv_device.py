@@ -37,7 +37,7 @@ class DriverDevice(PlatformDriver):
         await self._update_attributes_from_dict({
             "identity": {
                 "family": self.device._family,
-                "name": self.device._model,
+                "model": self.device._model,
                 "manufacturer": self.device._manufacturer,
             }
         })
