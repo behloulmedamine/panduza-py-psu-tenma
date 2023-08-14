@@ -34,10 +34,6 @@ class PlatformDeviceFactory:
         try:
             dev = self.__devices[driver](config.get("settings", {}))
             dev._PZA_DEV_config()
-            self.__platform.load_interface("default", name, {
-                    "name": "device",
-                    "driver": "py.device"
-            }, dev)
             return dev
 
         except Exception as e:

@@ -31,6 +31,7 @@ class PlatformDeviceModel:
         if self._characteristics == None:
             raise Warning("Characteristics is not set")
         self._PZA_DEV_set_name()
+        self._PZA_DEV_create_interfaces()
         return {
             "family": self._family,
             "model": self._model,
@@ -38,10 +39,19 @@ class PlatformDeviceModel:
             "characteristics": self._characteristics
         }
 
-    def _PZA_DEV_interfaces(self):
+    def _PZA_DEV_create_interfaces(self):
         
         """
         """
+        self._interfaces.append({
+                "name": "device",
+                "driver": "py.device",
+        })
+    
+    def _PZA_DEV_interfaces(self):
+        """
+        """
+        return self._interfaces
 
     def _PZA_DEV_interface_objs(self):
         """
@@ -87,6 +97,11 @@ class PlatformDeviceModel:
                     "driver": value["driver"],
                     "settings": value.get("settings", {})
                 })
+
+    def append_device_interface(self, interface):
+        """
+        """
+        self._interfaces.append(interface)
 
     def add_interface_obj(self, interface):
         """
