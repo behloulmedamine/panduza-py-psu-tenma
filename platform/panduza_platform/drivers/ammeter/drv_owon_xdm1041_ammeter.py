@@ -2,6 +2,7 @@ from hamcrest import assert_that, has_key, instance_of
 from meta_drivers.ammeter import MetaDriverAmmeter
 # from connectors.modbus_client_serial import ConnectorModbusClientSerial
 
+from connectors.serial_tty import ConnectorSerialTty
 
 class DriverXDM1041Ammeter(MetaDriverAmmeter):
     """
@@ -29,11 +30,8 @@ class DriverXDM1041Ammeter(MetaDriverAmmeter):
         assert_that(settings, has_key("usb_model"))
         assert_that(settings, has_key("serial_baudrate"))
 
-        # # Get the gate
-        # self.modbus = await ConnectorModbusClientSerial.Get(**settings)
-
-        # # 
-        # self.modbus_unit = 1
+        # Get the gate
+        self.serp = await ConnectorSerialTty.Get(**settings)
 
         # Call meta class BPS ini
         await super()._PZA_DRV_loop_init(loop, tree)

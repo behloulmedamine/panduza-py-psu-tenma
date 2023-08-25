@@ -13,7 +13,7 @@ class DeviceOwonXdm1041(PlatformDeviceModel):
         """
         """
         return {
-            "model": "owon.xdm1041",
+            "model": "Owon.Xdm1041",
         }
 
     def _PZA_DEV_interfaces(self):
@@ -27,15 +27,15 @@ class DeviceOwonXdm1041(PlatformDeviceModel):
         # if fake_mode:
         #     pass
         # else:
-        #     interfaces.append({
-        #         "name": f"bps",
-        #         "driver": "hanmatek.hm310t.bps",
-        #         "settings": {
-        #             "usb_vendor": USBID_VENDOR,
-        #             "usb_model": USBID_MODEL,
-        #             "serial_baudrate": 9600
-        #         }
-        #     })
+        interfaces.append({
+            "name": f"ammmm",
+            "driver": "owon.xdm1041.ammeter",
+            "settings": {
+                "usb_vendor": USBID_VENDOR,
+                "usb_model": USBID_MODEL,
+                "serial_baudrate": 115200
+            }
+        })
         #     interfaces.append({
         #         "name": f"am",
         #         "driver": "hanmatek.hm310t.ammeter",

@@ -1,5 +1,9 @@
 import serial
 import logging
+import asyncio
+
+from log.driver import driver_logger
+
 from .serial_base import ConnectorSerialBase
 from .udev_tty import SerialPortFromUsbSetting
 
@@ -7,40 +11,70 @@ class ConnectorSerialTty(ConnectorSerialBase):
     """
     """
 
+    # Hold instances mutex
+    __MUTEX = asyncio.Lock()
 
     # Contains instances
-    __instances = {}
+    __INSTANCES = {}
+
+    # Local logs
+    log = driver_logger("ConnectorSerialTty")
 
     ###########################################################################
     ###########################################################################
 
     @staticmethod
-    def Get(**kwargs):
+    async def Get(**kwargs):
         """Singleton main getter
+
+        
+        :Keyword Arguments:
+        * *serial_port_name* (``str``) --
+            serial port name
+    
+        * *serial_baudrate* (``int``) --
+            serial
+        * *serial_bytesize* (``int``) --
+            serial
+
+        * *usb_vendor* (``str``) --
+            ID_VENDOR_ID
+        * *usb_model* (``str``) --
+            ID_MODEL_ID
+        * *usb_serial_short* (``str``) --
+            ID_SERIAL_SHORT
+
         """
-        # Get the serial port name
-        port_name = None
-        if "port_name" in kwargs:
-            port_name = kwargs["port_name"]
-        elif "vendor" in kwargs:
-            port_name = SerialPortFromUsbSetting(**kwargs)
-            kwargs["port_name"] = port_name
-        else:
-            raise Exception("no way to identify the serial port")
+        # Log
+        ConnectorSerialTty.log.debug(f"Get connector for {kwargs}")
 
+        async with ConnectorSerialTty.__MUTEX:
 
-        # Create the new connector
-        if not (port_name in ConnectorSerialTty.__instances):
-            ConnectorSerialTty.__instances[port_name] = None
-            # try:
-            new_instance = ConnectorSerialTty(**kwargs)
-            ConnectorSerialTty.__instances[port_name] = new_instance
-            # except Exception as e:
-            #     ConnectorSerialTty.__instances.pop(port_name)
-            #     raise Exception('Error during initialization').with_traceback(e.__traceback__)
+            # Log
+            ConnectorSerialTty.log.debug(f"Lock acquired !")
 
-        # Return the previously created
-        return ConnectorSerialTty.__instances[port_name]
+            # Get the serial port name
+            serial_port_name = None
+            if "serial_port_name" in kwargs:
+                serial_port_name = kwargs["serial_port_name"]
+            elif "usb_vendor" in kwargs:
+                serial_port_name = SerialPortFromUsbSetting(**kwargs)
+                kwargs["serial_port_name"] = serial_port_name
+            else:
+                raise Exception("no way to identify the modbus serial port")
+
+            # Create the new connector
+            if not (serial_port_name in ConnectorSerialTty.__instances):
+                ConnectorSerialTty.__instances[serial_port_name] = None
+                # try:
+                new_instance = ConnectorSerialTty(**kwargs)
+                ConnectorSerialTty.__instances[serial_port_name] = new_instance
+                # except Exception as e:
+                #     ConnectorSerialTty.__instances.pop(serial_port_name)
+                #     raise Exception('Error during initialization').with_traceback(e.__traceback__)
+
+            # Return the previously created
+            return ConnectorSerialTty.__instances[serial_port_name]
 
 
     ###########################################################################
