@@ -5,6 +5,7 @@ from .platform      import PZA_DRIVERS_LIST as PLATFORM_DRIVERS
 from .bpc           import PZA_DRIVERS_LIST as BPC_DRIVERS
 from .relay         import PZA_DRIVERS_LIST as RELAY_DRIVERS
 from .voltmeter     import PZA_DRIVERS_LIST as VOLTMETERS_DRIVERS
+from .servomotor    import PZA_DRIVERS_LIST as SERVOMOTOR_DRIVERS
 
 PZA_DRIVERS_LIST= [] \
     + AMMETERS_DRIVERS \
@@ -12,4 +13,5 @@ PZA_DRIVERS_LIST= [] \
     + PLATFORM_DRIVERS \
     + BPC_DRIVERS \
     + RELAY_DRIVERS \
-    + VOLTMETERS_DRIVERS
+    + VOLTMETERS_DRIVERS \
+    + SERVOMOTOR_DRIVERS
