@@ -87,8 +87,8 @@ class DrvHanmatekHm310tBpc(MetaDriverBpc):
 
     async def _PZA_DRV_BPC_write_voltage_value(self, v):
         addr = 0x0030
-        int16_value = int(v * 100)
-        self.log.info(f"write value voltage addr={hex(addr)} valuex100={int16_value}")
+        int16_value = int(round(v * 100)) # Do not let 'int' cast round the result for you
+        self.log.info(f"write voltage value={v} addr={hex(addr)} valuex100={int16_value}")
         await self.modbus.write_register(addr, int16_value, self.modbus_unit)
 
     # ---
@@ -114,7 +114,7 @@ class DrvHanmatekHm310tBpc(MetaDriverBpc):
 
     async def _PZA_DRV_BPC_write_current_value(self, v):
         addr = 0x0031
-        int16_value = int(v * 1000.0)
+        int16_value = int(round(v * 1000.0))
         self.log.info(f"write value current addr={hex(addr)} valuex1000={int16_value}")
         await self.modbus.write_register(addr, int16_value, self.modbus_unit)
 
