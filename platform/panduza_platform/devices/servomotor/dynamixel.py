@@ -1,9 +1,8 @@
 
 from core.platform_device import PlatformDevice
 
-USBID_VENDOR="1a86"
-USBID_MODEL="7523"
-TTY_BASE="/dev/ttyUSB"
+
+TTY_BASE="/dev/ttyUSB0"
 
 class DeviceDynamixel(PlatformDevice):
     """Servomotor
@@ -13,7 +12,7 @@ class DeviceDynamixel(PlatformDevice):
         """
         """
         return {
-            "model": "Dynamixel",
+            "model": "ax12-a",
             "manufacturer": "Dynamixel"
         }
 
@@ -22,21 +21,19 @@ class DeviceDynamixel(PlatformDevice):
         """
         interfaces = []
 
-        fake_mode = self._initial_settings.get("fake_mode", False)
-
-
-        if fake_mode:
-            pass
-        else:
+        serial_port_name = self._initial_settings.get("serial_port_name",TTY_BASE)
+        number_of_servo = self._initial_settings.get("number_of_servo",TTY_BASE)
+        
+        for servo_id in range (0,number_of_servo):
             interfaces.append({
-                "name": f"bpc",
-                "driver": "panduza.servomotor",
-                "settings": {
-                    "usb_vendor": USBID_VENDOR,
-                    "usb_model": USBID_MODEL,
-                    "serial_baudrate": 9600
-                }
-            })
+            "name": f"servo_ID_{servo_id}",
+            "driver": "panduza.servomotor",
+            "settings": {
+                "serial_port_name": serial_port_name,
+                "serial_baudrate": 9600,
+                "number_of_servo" : number_of_servo
+            }
+        })
 
         return interfaces
 

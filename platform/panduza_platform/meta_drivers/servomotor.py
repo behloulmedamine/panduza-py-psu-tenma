@@ -30,7 +30,7 @@ class MetaDriverServomotor(PlatformDriver):
         """
         # Set handers
         self.__cmd_handlers = {
-            "measure" : self.__handle_cmds_set_measure
+            "position" : self.__handle_cmds_set_position
         }
 
         # 
@@ -49,7 +49,7 @@ class MetaDriverServomotor(PlatformDriver):
 
     async def _PZA_DRV_cmds_set(self, loop, payload):
         cmds = self.payload_to_dict(payload)
-        # self.log.debug(f"cmds as json : {cmds}")
+        self.log.debug(f"cmds as json : {cmds}")
         for att in self.__cmd_handlers:
             if att in cmds:
                 await self.__cmd_handlers[att](cmds[att])
@@ -63,11 +63,21 @@ class MetaDriverServomotor(PlatformDriver):
     def _PZA_DRV_SERVOMOTOR_config(self):
         """Driver base configuration
         """
-        pass
+        file_name = inspect.stack()[0][1]
+        function_name = inspect.stack()[0][3]
+        raise NotImplementedError(f"Function not implemented ! '{function_name}' => %{file_name}%")
 
     # ---
 
-    async def _PZA_DRV_SERVOMOTOR_read_position_value(self):
+    async def _PZA_DRV_SERVOMOTOR_get_position_value(self):
+        """
+        """
+        file_name = inspect.stack()[0][1]
+        function_name = inspect.stack()[0][3]
+        raise NotImplementedError(f"Function not implemented ! '{function_name}' => %{file_name}%")
+    
+    
+    async def _PZA_DRV_SERVOMOTOR_set_position_value(self,value):
         """
         """
         file_name = inspect.stack()[0][1]
@@ -86,7 +96,7 @@ class MetaDriverServomotor(PlatformDriver):
             await asyncio.sleep(self.__polling_cycle)
             await self._update_attributes_from_dict({
                 "position": {
-                    "value": await self._PZA_DRV_SERVOMOTOR_read_position_value()
+                    "value": await self._PZA_DRV_SERVOMOTOR_get_position_value()
                 }
             })
 
@@ -95,19 +105,24 @@ class MetaDriverServomotor(PlatformDriver):
     async def __update_attribute_initial(self):
         """Function to perform the initial init
         """
-        await self.__att_measure_full_update()
+        await self.__att_position_full_update()
 
     # ---
 
-    async def __handle_cmds_set_measure(self, cmd_att):
+    async def __handle_cmds_set_position(self, cmd_att):
         """
         """
         update_obj = {}
         await self._prepare_update(update_obj, 
                             "position", cmd_att,
-                            "polling_cycle", [float, int]
-                            , self.__set_poll_cycle
-                            , self.__get_poll_cycle)
+                            "value" , [int],
+                            self._PZA_DRV_SERVOMOTOR_set_position_value,
+                            self._PZA_DRV_SERVOMOTOR_get_position_value)
+        # await self._prepare_update(update_obj, 
+        #                     "position", cmd_att,
+        #                     "polling_cycle", [float, int], 
+        #                     self.__set_poll_cycle, 
+        #                     self.__get_poll_cycle)
         await self._update_attributes_from_dict(update_obj)
 
     # ---
@@ -122,12 +137,12 @@ class MetaDriverServomotor(PlatformDriver):
 
     # ---
 
-    async def __att_measure_full_update(self):
+    async def __att_position_full_update(self):
         """
         """
         await self._update_attributes_from_dict({
             "position": {
-                "value": await self._PZA_DRV_SERVOMOTOR_read_position_value(),
+                "value": await self._PZA_DRV_SERVOMOTOR_get_position_value(),
                 "polling_cycle": await self.__get_poll_cycle()
             }
         })
