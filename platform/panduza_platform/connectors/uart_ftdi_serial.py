@@ -1,10 +1,12 @@
 import logging
 import asyncio
-import serial_asyncio
 import serial
+import serial_asyncio
 
 from .uart_ftdi_base import ConnectorUartFtdiBase
 from log.driver import driver_logger
+
+from .udev_tty import SerialPortFromUsbSetting
 
 class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
     """
@@ -33,7 +35,11 @@ class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
     
         * *serial_baudrate* (``int``) --
             serial baudrate
-
+            
+        * *usb_vendor* (``str``) --
+            ID_VENDOR_ID
+        * *usb_model* (``str``) --
+            ID_MODEL_ID
         """
         # Log
         ConnectorUartFtdiSerial.log.debug(f"Get connector for {kwargs}")
@@ -48,6 +54,9 @@ class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
             serial_port_name = None
             if "serial_port_name" in kwargs:
                 serial_port_name = kwargs["serial_port_name"]
+            elif "usb_vendor" in kwargs:
+                serial_port_name = SerialPortFromUsbSetting(**kwargs)
+                kwargs["serial_port_name"] = serial_port_name
         
             else:
                 raise Exception("no way to identify the serial port")
@@ -114,8 +123,12 @@ class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
             try:
                 
                 #data = await self.reader.readuntil(b'\n')
-                data = await asyncio.wait_for(self.reader.readline(), timeout=2.0) 
-                decoded_data = data.decode('utf-8').strip()  
+                
+                #data = await asyncio.wait_for(self.reader.readline(), timeout=2.0) 
+                data = await asyncio.wait_for(self.reader.readuntil(b'\n'), timeout=1.0)
+                decoded_data = data.decode('utf-8').strip()
+                print("receive")
+                print(decoded_data)
                 return decoded_data
             
             except asyncio.TimeoutError as e: 
@@ -130,7 +143,9 @@ class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
         async with self._mutex:
             _, self.writer = await serial_asyncio.open_serial_connection(loop = self.loop,url=self.port_name, baudrate=self.baudrate)
             await asyncio.sleep(1)
-            print("aaaa")
+            print("send")
+            print(message.encode())
+            print(self.port_name)
             self.writer.write(message.encode())
             await self.writer.drain() 
             self.writer.close() 
