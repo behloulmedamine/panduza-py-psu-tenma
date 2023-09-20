@@ -85,7 +85,7 @@ class DrvTenma722710Bpc(MetaDriverBpc):
     async def _PZA_DRV_BPC_read_voltage_value(self):
     	await self.uart_connector.write_uart(f"VSET{self.channel}?\n")
     	voltage = await self.uart_connector.read_uart()
-    	return voltage
+    	return float(voltage)
 
     # ---
 
@@ -108,7 +108,7 @@ class DrvTenma722710Bpc(MetaDriverBpc):
     async def _PZA_DRV_BPC_read_current_value(self):
     	await self.uart_connector.write_uart(f"ISET{self.channel}?\n")
     	current = await self.uart_connector.read_uart()
-    	return current
+    	return float(current)
 
     # ---
 
