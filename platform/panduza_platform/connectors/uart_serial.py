@@ -3,12 +3,12 @@ import asyncio
 import serial
 import serial_asyncio
 
-from .uart_ftdi_base import ConnectorUartFtdiBase
+from .uart_base import ConnectorUartBase
 from log.driver import driver_logger
 
 from .udev_tty import SerialPortFromUsbSetting
 
-class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
+class ConnectorUartSerial(ConnectorUartBase):
     """
     """
 
@@ -19,7 +19,7 @@ class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
     __INSTANCES = {}
 
     # Local logs
-    log = driver_logger("ConnectorUartFtdiSerial")
+    log = driver_logger("ConnectorUartSerial")
 
     ###########################################################################
     ###########################################################################
@@ -42,12 +42,12 @@ class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
             ID_MODEL_ID
         """
         # Log
-        ConnectorUartFtdiSerial.log.debug(f"Get connector for {kwargs}")
+        ConnectorUartSerial.log.debug(f"Get connector for {kwargs}")
 
-        async with ConnectorUartFtdiSerial.__MUTEX:
+        async with ConnectorUartSerial.__MUTEX:
 
             # Log
-            ConnectorUartFtdiSerial.log.debug(f"Lock acquired !")
+            ConnectorUartSerial.log.debug(f"Lock acquired !")
 
 
             # Get the serial port name
@@ -55,6 +55,7 @@ class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
             if "serial_port_name" in kwargs:
                 serial_port_name = kwargs["serial_port_name"]
             elif "usb_vendor" in kwargs:
+                # Get the serial port name using "usb_vendor"
                 serial_port_name = SerialPortFromUsbSetting(**kwargs)
                 kwargs["serial_port_name"] = serial_port_name
         
@@ -62,20 +63,20 @@ class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
                 raise Exception("no way to identify the serial port")
 
             # Create the new connector
-            if not (serial_port_name in ConnectorUartFtdiSerial.__INSTANCES):
-                ConnectorUartFtdiSerial.__INSTANCES[serial_port_name] = None
+            if not (serial_port_name in ConnectorUartSerial.__INSTANCES):
+                ConnectorUartSerial.__INSTANCES[serial_port_name] = None
                 try:
-                    new_instance = ConnectorUartFtdiSerial(loop,**kwargs)
+                    new_instance = ConnectorUartSerial(loop,**kwargs)
                     await new_instance.connect()
                     
-                    ConnectorUartFtdiSerial.__INSTANCES[serial_port_name] = new_instance
-                    ConnectorUartFtdiSerial.log.info("connector created")
+                    ConnectorUartSerial.__INSTANCES[serial_port_name] = new_instance
+                    ConnectorUartSerial.log.info("connector created")
                 except Exception as e:
-                    ConnectorUartFtdiSerial.__INSTANCES.pop(serial_port_name)
+                    ConnectorUartSerial.__INSTANCES.pop(serial_port_name)
                     raise Exception('Error during initialization').with_traceback(e.__traceback__)
 
             # Return the previously created
-            return ConnectorUartFtdiSerial.__INSTANCES[serial_port_name]
+            return ConnectorUartSerial.__INSTANCES[serial_port_name]
 
     ###########################################################################
     ###########################################################################
@@ -90,7 +91,7 @@ class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
         
         self.loop = loop
         
-        if not (key in ConnectorUartFtdiSerial.__INSTANCES):
+        if not (key in ConnectorUartSerial.__INSTANCES):
             raise Exception("You need to pass through Get method to create an instance")
         else:
             self.log = logging.getLogger(key)
@@ -109,7 +110,7 @@ class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
         """Start the serial connection
         """
 
-        self.reader,_ = await serial_asyncio.open_serial_connection(loop = self.loop,url=self.port_name, baudrate=self.baudrate)
+        self.reader,self.writer = await serial_asyncio.open_serial_connection(loop = self.loop,url=self.port_name, baudrate=self.baudrate)
         
 
 
@@ -118,17 +119,14 @@ class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
 
 
     async def read_uart(self):
+        """Read from UART using asynchronous mode
+        """
+        
         async with self._mutex:
             #await asyncio.sleep(1)
             try:
-                
-                #data = await self.reader.readuntil(b'\n')
-                
-                #data = await asyncio.wait_for(self.reader.readline(), timeout=2.0) 
                 data = await asyncio.wait_for(self.reader.readuntil(b'\n'), timeout=1.0)
                 decoded_data = data.decode('utf-8').strip()
-                print("receive")
-                print(decoded_data)
                 return decoded_data
             
             except asyncio.TimeoutError as e: 
@@ -140,20 +138,15 @@ class ConnectorUartFtdiSerial(ConnectorUartFtdiBase):
     ###########################################################################
 
     async def write_uart(self,message):
+        """write to UART using asynchronous mode
+        """
         async with self._mutex:
-            _, self.writer = await serial_asyncio.open_serial_connection(loop = self.loop,url=self.port_name, baudrate=self.baudrate)
-            await asyncio.sleep(1)
-            print("send")
-            print(message.encode())
-            print(self.port_name)
-            self.writer.write(message.encode())
-            await self.writer.drain() 
-            self.writer.close() 
-
-
-
-
-
+            #await asyncio.sleep(1)
+            try:
+                self.writer.write(message.encode())
+                await self.writer.drain()
+            except Exception as e:
+                raise Exception('Error during writing to uart').with_traceback(e.__traceback__)
 
 
     ###########################################################################

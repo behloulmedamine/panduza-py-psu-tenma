@@ -1,6 +1,6 @@
 import abc
 
-class ConnectorUartFtdiBase(metaclass=abc.ABCMeta):
+class ConnectorUartBase(metaclass=abc.ABCMeta):
     """Base class for modbus client connectors
 
     It defines method to interact with the modbus client
