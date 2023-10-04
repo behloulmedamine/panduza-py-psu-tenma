@@ -3,7 +3,7 @@ import asyncio
 import serial
 import serial_asyncio
 
-from .uart_base import ConnectorUartBase
+from .serial_base import ConnectorUartBase
 from log.driver import driver_logger
 
 from .udev_tty import SerialPortFromUsbSetting

@@ -1,6 +1,6 @@
 from hamcrest import assert_that, has_key, instance_of
 from meta_drivers.bpc import MetaDriverBpc
-from connectors.uart_serial import ConnectorUartSerial
+from connectors.serial_tty import ConnectorUartSerial
 
 STATE_VALUE_ENUM = { True : 1, False: 0  }
 VOLTAGE_BOUNDS     = { "min": 0, "max": 30 }
